@@ -13,7 +13,7 @@ class ProductServiceApplication : CommandLineRunner {
     productRepository.deleteAll()
 
     productRepository.save(
-        ProductModel(
+        Product(
             "Fahrrad",
             "Mein tolles neues Fahrrad hat Bremse, Hupe und Licht.",
             listOf("Fahrrad", "Mobilität")
