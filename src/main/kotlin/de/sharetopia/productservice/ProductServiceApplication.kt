@@ -1,5 +1,7 @@
 package de.sharetopia.productservice
 
+import de.sharetopia.productservice.product.model.ProductModel
+import de.sharetopia.productservice.product.repository.ProductRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -14,9 +16,9 @@ class ProductServiceApplication : CommandLineRunner {
 
     productRepository.save(
         ProductModel(
-            "Fahrrad",
-            "Mein tolles neues Fahrrad hat Bremse, Hupe und Licht.",
-            listOf("Fahrrad", "Mobilität")
+            title="Fahrrad",
+            description = "Mein tolles neues Fahrrad hat Bremse, Hupe und Licht.",
+            tags = listOf("Fahrrad", "Mobilität")
         )
     )
 
