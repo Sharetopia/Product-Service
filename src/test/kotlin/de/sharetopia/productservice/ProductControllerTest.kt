@@ -31,6 +31,7 @@ class ProductControllerTest @Autowired constructor(
     private val restTemplate: TestRestTemplate
 ){
     private val defaultProductId = ObjectId.get().toString()
+    private val initialProductModel: ProductModel = ProductModel(ObjectId(defaultProductId), "Title", "Description", listOf("Tags"))
 
     @LocalServerPort
     protected var port: Int = 0
@@ -104,9 +105,10 @@ class ProductControllerTest @Autowired constructor(
         //val updatedProduct: Optional<ProductModel> = productRepository.findById(defaultProductId)
 
         assertEquals(200, updateResponse.statusCode.value())
-        /*assertEquals(defaultProductId, updatedProduct.id)
-        assertEquals(productRequest.description, updatedProduct.description)
-        assertEquals(productRequest.title, updatedProduct.title)*/
+        assertEquals(defaultProductId, updateResponse.body?.id)
+        assertEquals(productRequest.description, updateResponse.body?.description)
+        assertEquals(productRequest.title, updateResponse.body?.title)
+        assertEquals(productRequest.tags, updateResponse.body?.tags)
     }
 
     @Test
@@ -124,10 +126,25 @@ class ProductControllerTest @Autowired constructor(
         assertFalse(productRepository.findById(defaultProductId).isPresent)
     }
 
+    @Test
+    fun `should update single field of existing task`() {
+        saveOneProduct()
+        val titleOnlyProductDTO = ProductDTO("patched")
 
-    private fun getRootUrl(): String? = "http://localhost:$port/api/v1/products"
+        val response = restTemplate.patchForObject(
+            getRootUrl() + "/$defaultProductId",
+            titleOnlyProductDTO,
+            ProductView::class.java
+        )
 
-    private fun saveOneProduct() = productRepository.save(ProductModel(ObjectId(defaultProductId), "Title", "Description", listOf("Tags")))
+        assertEquals(titleOnlyProductDTO.title, response.title)
+        assertEquals(initialProductModel.description, response.description)
+        assertEquals(initialProductModel.tags, response.tags)
+    }
+
+    private fun getRootUrl(): String = "http://localhost:$port/api/v1/products"
+
+    private fun saveOneProduct() = productRepository.save(initialProductModel)
 
     private fun prepareProductRequest() = ProductDTO(title="Default title", description = "Default description", tags=listOf("default tag1", "default tag2"))
 

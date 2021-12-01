@@ -41,25 +41,25 @@ class ProductController {
     return productService
         .findById(productId)
         .map { prd -> ResponseEntity.ok(ObjectMapperUtils.map(prd, ProductView::class.java)) }
-        .orElseThrow { ProductNotFoundException("Product Id is not found : $productId") }
+        .orElseThrow { ProductNotFoundException(productId) }
   }
 
   @DeleteMapping("/products/{id}")
   fun deleteById(@PathVariable(value = "id") productId: String): ResponseEntity<Any> {
-    productService.findById(productId).orElseThrow { ProductNotFoundException("Product Id is not found : $productId") }
+    productService.findById(productId).orElseThrow { ProductNotFoundException(productId) }
     productService.deleteById(productId)
     return ResponseEntity<Any>(HttpStatus.OK)
   }
 
   @PatchMapping("/products/{id}")
-  fun partialUpdate(@PathVariable(value = "id") productId: String, @RequestBody productDTO: ProductDTO): ResponseEntity<ProductView> {
-    val storedProductModel = productService.findById(productId).orElseThrow { ProductNotFoundException("Product Id is not found : $productId") }
+  fun partialUpdate(@PathVariable(value = "id") productId: String, @RequestBody productDTO: ProductDTO): ProductView {
+    val storedProductModel = productService.findById(productId).orElseThrow { ProductNotFoundException(productId) }
     val updatedProduct = productService.updateOrInsert(productId, storedProductModel.copy( // Assuming your class is immutable
       title = productDTO.title ?: storedProductModel.title,
       description = productDTO.description ?: storedProductModel.description,
       tags = productDTO.tags ?: storedProductModel.tags
     ))
-    return ResponseEntity.ok(ObjectMapperUtils.map(updatedProduct, ProductView::class.java))
+    return ObjectMapperUtils.map(updatedProduct, ProductView::class.java)
   }
 
 }
