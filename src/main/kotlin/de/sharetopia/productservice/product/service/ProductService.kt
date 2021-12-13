@@ -1,6 +1,8 @@
 package de.sharetopia.productservice.product.service
 
 import de.sharetopia.productservice.product.model.ProductModel
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.util.Optional
 
 interface ProductService {
@@ -15,4 +17,6 @@ interface ProductService {
   fun findById(productId: String): Optional<ProductModel>
 
   fun deleteById(productId: String)
+
+  fun findManyById(ids: List<String>, pageable: Pageable): Page<ProductModel>
 }

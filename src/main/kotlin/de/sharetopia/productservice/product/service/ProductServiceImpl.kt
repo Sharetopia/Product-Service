@@ -6,6 +6,8 @@ import de.sharetopia.productservice.product.repository.ProductRepository
 import org.bson.types.ObjectId
 import java.util.Optional
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -33,5 +35,9 @@ class ProductServiceImpl : ProductService {
 
   override fun deleteById(productId: String) {
     productRepository.deleteById(productId)
+  }
+
+  override fun findManyById(ids: List<String>, pageable: Pageable): Page<ProductModel> {
+    return productRepository.findByIdIn(ids, pageable)
   }
 }

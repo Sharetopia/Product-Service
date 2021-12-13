@@ -87,6 +87,7 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(productRequest.description, response.body?.description)
         assertEquals(productRequest.title, response.body?.title)
         assertEquals(productRequest.tags, response.body?.tags)
+        assertEquals(productRequest.tags, response.body?.tags)
     }
 
 
