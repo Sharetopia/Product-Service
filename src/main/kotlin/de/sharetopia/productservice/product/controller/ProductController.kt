@@ -5,7 +5,7 @@ import de.sharetopia.productservice.product.dto.ProductView
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
 import de.sharetopia.productservice.product.model.ElasticProductModel
 import de.sharetopia.productservice.product.model.ProductModel
-import de.sharetopia.productservice.product.repository.ElasticProductRepository
+import de.sharetopia.productservice.product.service.ElasticProductService
 import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.util.ObjectMapperUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*
 class ProductController {
 
   @Autowired private lateinit var productService: ProductService
-  @Autowired private lateinit var elasticProductRepository: ElasticProductRepository
+  @Autowired private lateinit var elasticProductService: ElasticProductService
 
   @GetMapping("/products")
   fun getAll(): List<ProductView> {
@@ -34,7 +34,7 @@ class ProductController {
     val requestProductModel = ObjectMapperUtils.map(productDTO, ProductModel::class.java)
     val createdProductModel = productService.create(requestProductModel)
     var elasticProductModel = ObjectMapperUtils.map(createdProductModel, ElasticProductModel::class.java)
-    elasticProductRepository.save(elasticProductModel)
+    elasticProductService.save(elasticProductModel)
     return ObjectMapperUtils.map(createdProductModel, ProductView::class.java)
   }
 
@@ -43,7 +43,7 @@ class ProductController {
     val requestProductModel = ObjectMapperUtils.map(productDTO, ProductModel::class.java)
     val updatedProductModel = productService.updateOrInsert(productId, requestProductModel)
     var elasticProductModel = ObjectMapperUtils.map(updatedProductModel, ElasticProductModel::class.java)
-    elasticProductRepository.save(elasticProductModel)
+    elasticProductService.save(elasticProductModel)
 
     return ObjectMapperUtils.map(updatedProductModel, ProductView::class.java)
   }
@@ -68,15 +68,24 @@ class ProductController {
   fun executeSearch(@RequestParam("term") searchTerm: String, @RequestParam(defaultValue = "0") pageNo: Int,
                            @RequestParam(defaultValue = "10") pageSize: Int): ResponseEntity<Any> {
     val paging: Pageable = PageRequest.of(pageNo, pageSize)
-    val foundProducts = elasticProductRepository.findByTitle(searchTerm, paging)
+    val foundProducts = elasticProductService.findByTitle(searchTerm, paging)
     return ResponseEntity.ok(ObjectMapperUtils.map(foundProducts, Page.empty<ProductView>()::class.java))
   }
 
-  @GetMapping("/products/find")
-  fun findRelevantProducts(@RequestParam("term") searchTerm: String, @RequestParam("distance") distance: Int, @RequestParam(defaultValue = "0") pageNo: Int,
+  @GetMapping("/products/findNearCoordinates")
+  fun findRelevantProductsByCoordinates(@RequestParam("term") searchTerm: String, @RequestParam("distance") distance: Int, @RequestParam(defaultValue = "0") pageNo: Int,
                            @RequestParam(defaultValue = "10") pageSize: Int,@RequestParam("lat") lat: Double,@RequestParam("lon") lon: Double): ResponseEntity<Any> {
     val paging: Pageable = PageRequest.of(pageNo, pageSize)
-    val foundProducts = elasticProductRepository.findByTitleAndNear(searchTerm, distance, paging, lat, lon,)
+    val foundProducts = elasticProductService.findByTitleAndNearCoordinates(searchTerm, distance, paging, lat, lon)
+    return ResponseEntity.ok(ObjectMapperUtils.map(foundProducts, Page.empty<ProductView>()::class.java))
+  }
+
+  @GetMapping("/products/findNearCity")
+  fun findRelevantProductsByZipOrCity(@RequestParam("term") searchTerm: String, @RequestParam("distance") distance: Int, @RequestParam(defaultValue = "0") pageNo: Int,
+                           @RequestParam(defaultValue = "10") pageSize: Int,@RequestParam("cityIdentifier") cityIdentifier: String): ResponseEntity<Any> {
+    val paging: Pageable = PageRequest.of(pageNo, pageSize)
+
+    val foundProducts = elasticProductService.findByTitleAndNearCity(searchTerm, distance, paging, cityIdentifier)
     return ResponseEntity.ok(ObjectMapperUtils.map(foundProducts, Page.empty<ProductView>()::class.java))
   }
 
@@ -85,7 +94,7 @@ class ProductController {
     productService.findById(productId).orElseThrow { ProductNotFoundException(productId) }
     productService.deleteById(productId)
 
-    elasticProductRepository.deleteById(productId)
+    elasticProductService.deleteById(productId)
 
     return ResponseEntity<Any>(HttpStatus.OK)
   }
@@ -99,8 +108,7 @@ class ProductController {
       tags = productDTO.tags ?: storedProductModel.tags
     ))
 
-    elasticProductRepository.save(ObjectMapperUtils.map(updatedProduct, ElasticProductModel::class.java))
-
+    elasticProductService.save(ObjectMapperUtils.map(updatedProduct, ElasticProductModel::class.java))
     return ObjectMapperUtils.map(updatedProduct, ProductView::class.java)
   }
 

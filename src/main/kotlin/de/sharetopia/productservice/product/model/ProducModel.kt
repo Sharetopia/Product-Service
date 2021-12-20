@@ -15,4 +15,5 @@ public data class ProductModel(@Id var id: ObjectId = ObjectId.get(), var title:
 @Document(collection = "products")
 public data class ProductModel(@Id var id: ObjectId = ObjectId.get(), var title: String="",
                                var description: String="", var tags: List<String> = listOf(),
+                               var address: Address = Address("","",""),
                                @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE) var location: List<Double>?=null)

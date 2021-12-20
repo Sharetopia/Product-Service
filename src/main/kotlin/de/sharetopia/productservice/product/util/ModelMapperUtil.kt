@@ -22,14 +22,6 @@ object ObjectMapperUtils {
             .collect(Collectors.toList())
     }
 
-    fun <D, T> mapAllToPage(entityList: Page<T>, outCLass: Class<D>): Page<D> {
-        var allItems: List<D> = entityList.stream()
-            .map { entity: T -> map(entity, outCLass) }
-            .collect(Collectors.toList())
-
-        return PageImpl<D>(allItems)
-    }
-
     init {
         modelMapper.configuration.matchingStrategy = MatchingStrategies.STRICT
         modelMapper.configuration.isFieldMatchingEnabled = true

@@ -25,7 +25,7 @@ public interface ElasticProductRepository: ElasticsearchRepository<ElasticProduc
             "      }\n" +
             "      ]\n" +
             "    }}")
-    fun findByTitleAndNear(searchTerm: String, Distance: Int, pageable:Pageable, lat:Double, lon: Double): Page<ElasticProductModel>
+    fun findByTitleAndNear(searchTerm: String, distance: Int, pageable:Pageable, lat:Double, lon: Double): Page<ElasticProductModel>
 
     @Query("{\"match_phrase_prefix\": {\n" +
             "          \"title\": \"?0\"\n" +

@@ -1,14 +1,15 @@
 package de.sharetopia.productservice.product.service
 
-import de.sharetopia.productservice.product.dto.ProductDTO
 import de.sharetopia.productservice.product.model.ProductModel
 import de.sharetopia.productservice.product.repository.ProductRepository
+import de.sharetopia.productservice.product.util.GeoCoder
 import org.bson.types.ObjectId
-import java.util.Optional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.*
+
 
 @Service
 class ProductServiceImpl : ProductService {
@@ -17,6 +18,7 @@ class ProductServiceImpl : ProductService {
   override fun findAll(): List<ProductModel> = productRepository.findAll()
 
   override fun create(product: ProductModel): ProductModel {
+    product.location= GeoCoder.getCoordinatesForAddress(product.address)
     return productRepository.insert(product)
   }
 
@@ -29,6 +31,7 @@ class ProductServiceImpl : ProductService {
     product.id = ObjectId(productId)
     return productRepository.save(product);
   }
+
   override fun findById(productId: String): Optional<ProductModel> {
     return productRepository.findById(productId)
   }
