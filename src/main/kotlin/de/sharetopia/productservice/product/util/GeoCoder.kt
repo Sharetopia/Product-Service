@@ -7,7 +7,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestTemplate
-import java.util.HashMap
 
 object GeoCoder {
     private val urlString = "https://nominatim.openstreetmap.org/search?q={q}&format={format}&countrycodes={countrycodes}&limit={limit}"

@@ -1,8 +1,6 @@
 package de.sharetopia.productservice.product.repository
 
-import de.sharetopia.productservice.product.dto.ProductDTO
 import de.sharetopia.productservice.product.model.ElasticProductModel
-import de.sharetopia.productservice.product.model.ProductModel
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.elasticsearch.annotations.Query

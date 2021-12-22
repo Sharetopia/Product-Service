@@ -37,8 +37,6 @@ class ProductServiceApplication : CommandLineRunner {
 
     val products =  productRepository.findByLocationNear(GeoJsonPoint(9.430380, 48.923069), Distance(5.0, Metrics.KILOMETERS))
 
-    //val products = productRepository.findAll()
-
     print(products)
   }
 }

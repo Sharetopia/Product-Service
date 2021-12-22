@@ -1,10 +1,8 @@
 package de.sharetopia.productservice.product.dto
 
 import de.sharetopia.productservice.product.model.Address
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint
 
-//von client an server => andersrum ist view
+//Client to server
 data class ProductDTO(var title: String? = null,
                       var description: String? = null,
                       var tags: List<String>? = null,
