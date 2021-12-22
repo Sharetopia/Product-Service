@@ -24,11 +24,11 @@ class ElasticProductService {
         return elasticProductRepository.findByTitle(searchTerm, paging)
     }
 
-    fun findByTitleAndNearCoordinates(searchTerm: String, distance: Int, pageable:Pageable, lat:Double, lon: Double): Page<ElasticProductModel>{
+    /*fun findByTitleAndNearCoordinates(searchTerm: String, distance: Int, pageable:Pageable, lat:Double, lon: Double): Page<ElasticProductModel>{
         return elasticProductRepository.findByTitleAndNear(searchTerm, distance, pageable, lat, lon)
-    }
+    }*/
 
-    fun findByTitleAndNearCity(searchTerm: String, distance: Int, pageable:Pageable, cityIdentifier: String): Page<ElasticProductModel>{
+    fun findByTitleAndNearCity(searchTerm: String, distance: Int, pageable: Pageable ,cityIdentifier: String): Page<ElasticProductModel>{
         val geoCodedCoordinates = GeoCoder.getCoordinatesForCity(cityIdentifier)
         return elasticProductRepository.findByTitleAndNear(searchTerm, distance, pageable, geoCodedCoordinates[1], geoCodedCoordinates[0])
     }

@@ -1,9 +1,11 @@
 package de.sharetopia.productservice
 
 import de.sharetopia.productservice.product.model.Address
+import de.sharetopia.productservice.product.model.ElasticProductModel
 import de.sharetopia.productservice.product.model.ProductModel
 import de.sharetopia.productservice.product.repository.ElasticProductRepository
 import de.sharetopia.productservice.product.repository.ProductRepository
+import de.sharetopia.productservice.product.util.ObjectMapperUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -21,7 +23,7 @@ class ProductServiceApplication : CommandLineRunner {
     productRepository.deleteAll()
     elasticProductRepository.deleteAll()
 
-    productRepository.save(
+    val savedModel = productRepository.save(
         ProductModel(
             title="Fahrrad",
             description = "Mein tolles neues Fahrrad hat Bremse, Hupe und Licht.",
@@ -31,6 +33,7 @@ class ProductServiceApplication : CommandLineRunner {
             location = listOf(9.430380,48.923069)
         )
     )
+    elasticProductRepository.save(ObjectMapperUtils.map(savedModel, ElasticProductModel::class.java))
 
     val products =  productRepository.findByLocationNear(GeoJsonPoint(9.430380, 48.923069), Distance(5.0, Metrics.KILOMETERS))
 

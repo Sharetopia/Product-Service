@@ -4,7 +4,6 @@ import org.modelmapper.ModelMapper
 import org.modelmapper.convention.MatchingStrategies
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import java.util.stream.Collectors
 
 
@@ -20,6 +19,15 @@ object ObjectMapperUtils {
         return entityList.stream()
             .map { entity: T -> map(entity, outCLass) }
             .collect(Collectors.toList())
+    }
+
+    fun <D, T> mapEntityPageIntoDtoPage(entities: Page<T>, dtoClass: Class<D>): Page<D> {
+        return entities.map { objectEntity: T ->
+            modelMapper.map(
+                objectEntity,
+                dtoClass
+            )
+        }
     }
 
     init {

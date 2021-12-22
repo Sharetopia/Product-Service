@@ -61,7 +61,8 @@ class ProductController {
                        @RequestParam(defaultValue = "10") pageSize: Int): Page<ProductView> {
 
     val paging: Pageable = PageRequest.of(pageNo, pageSize)
-    return ObjectMapperUtils.map(productService.findManyById(productIdList, paging), Page.empty<ProductView>()::class.java)
+    var foundProducts = productService.findManyById(productIdList, paging)
+    return ObjectMapperUtils.mapEntityPageIntoDtoPage(foundProducts, ProductView::class.java)
   }
 
   @GetMapping("/products/searchExecution")
@@ -76,17 +77,15 @@ class ProductController {
   fun findRelevantProductsByCoordinates(@RequestParam("term") searchTerm: String, @RequestParam("distance") distance: Int, @RequestParam(defaultValue = "0") pageNo: Int,
                            @RequestParam(defaultValue = "10") pageSize: Int,@RequestParam("lat") lat: Double,@RequestParam("lon") lon: Double): ResponseEntity<Any> {
     val paging: Pageable = PageRequest.of(pageNo, pageSize)
-    val foundProducts = elasticProductService.findByTitleAndNearCoordinates(searchTerm, distance, paging, lat, lon)
-    return ResponseEntity.ok(ObjectMapperUtils.map(foundProducts, Page.empty<ProductView>()::class.java))
+    return ResponseEntity.ok("")
   }
 
   @GetMapping("/products/findNearCity")
   fun findRelevantProductsByZipOrCity(@RequestParam("term") searchTerm: String, @RequestParam("distance") distance: Int, @RequestParam(defaultValue = "0") pageNo: Int,
-                           @RequestParam(defaultValue = "10") pageSize: Int,@RequestParam("cityIdentifier") cityIdentifier: String): ResponseEntity<Any> {
+                           @RequestParam(defaultValue = "10") pageSize: Int,@RequestParam("cityIdentifier") cityIdentifier: String): Page<ProductView> {
     val paging: Pageable = PageRequest.of(pageNo, pageSize)
-
     val foundProducts = elasticProductService.findByTitleAndNearCity(searchTerm, distance, paging, cityIdentifier)
-    return ResponseEntity.ok(ObjectMapperUtils.map(foundProducts, Page.empty<ProductView>()::class.java))
+    return ObjectMapperUtils.mapEntityPageIntoDtoPage(foundProducts, ProductView::class.java)
   }
 
   @DeleteMapping("/products/{id}")

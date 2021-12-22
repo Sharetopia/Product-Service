@@ -14,7 +14,6 @@ public class ElasticProductModel{
 
     @Id var id: String? = null
 
-
     @Field(type = FieldType.Search_As_You_Type, name = "title", analyzer = "rebuilt_german")
     var title: String=""
 
@@ -23,6 +22,9 @@ public class ElasticProductModel{
 
     @Field(type = FieldType.Text, name = "tags")
     var tags: List<String> = listOf()
+
+    @Field(type = FieldType.Object, name = "address")
+    var address: Address = Address("","","")
 
     @GeoPointField
     var location: DoubleArray? = null

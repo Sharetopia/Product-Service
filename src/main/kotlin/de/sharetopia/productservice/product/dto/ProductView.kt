@@ -12,3 +12,10 @@ class ProductView {
     lateinit var address: Address
     lateinit var location: List<Double>
 }
+
+/*data class ProductView(var id: String? = null, var title: String? = null,
+                      var description: String? = null,
+                      var tags: List<String>? = null,
+                      var address: Address? = null,
+                      var location: List<Double>? = null){
+}*/
