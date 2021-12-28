@@ -1,10 +1,7 @@
 package de.sharetopia.productservice.product.model
 
-import org.elasticsearch.common.geo.GeoJson
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.*
-import org.springframework.data.elasticsearch.core.geo.GeoJsonPoint
-import org.springframework.data.elasticsearch.core.geo.GeoPoint
 
 
 
