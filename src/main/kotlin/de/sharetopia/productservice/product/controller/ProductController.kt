@@ -4,15 +4,18 @@ import de.sharetopia.productservice.ProductModel
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.security.Principal
 
 @RestController
+@CrossOrigin(origins = ["*"])
 @RequestMapping("/api/v1/")
 class ProductController {
 
   @Autowired private lateinit var productService: ProductService
 
   @GetMapping("/products")
-  fun getAll(): List<ProductModel> {
+  fun getAll(principal: Principal): List<ProductModel> {
+    println(principal.name)
     return productService.findAll()
   }
 
@@ -22,7 +25,8 @@ class ProductController {
   }
 
   @GetMapping("/products/{id}")
-  fun getById(@PathVariable(value = "id") productId: String): ResponseEntity<ProductModel> {
+  fun getById(principal: Principal, @PathVariable(value = "id") productId: String): ResponseEntity<ProductModel> {
+    println(principal.name)
     return productService
         .findById(productId)
         .map { prd -> ResponseEntity.ok(prd) }
