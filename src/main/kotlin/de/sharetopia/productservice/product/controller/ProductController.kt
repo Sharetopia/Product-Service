@@ -22,9 +22,11 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.security.Principal
 
 
 @RestController
+@CrossOrigin(origins = ["*"])
 @RequestMapping("/api/v1/")
 @Tag(name = "Products", description = "Endpoints for managing product listings")
 class ProductController {
@@ -42,7 +44,8 @@ class ProductController {
     )
   ])
   @GetMapping("/products")
-  fun getAll(): List<ProductView> {
+  fun getAll(principal: Principal): List<ProductView> {
+    println(principal.name)
     return ObjectMapperUtils.mapAll(productService.findAll(), ProductView::class.java)
   }
 
