@@ -10,7 +10,6 @@
       <change afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/auth/AwsCognitoJwtAuthFilter.kt" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/auth/JwtAuthentification.kt" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/auth/JwtConfiguration.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/auth/JwtIdTokenCredentialsHolder.kt" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/auth/SecurityConfiguration.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
@@ -99,7 +98,7 @@
       <workItem from="1638057932775" duration="13803000" />
       <workItem from="1638911652746" duration="6408000" />
       <workItem from="1639663119940" duration="4284000" />
-      <workItem from="1640264363318" duration="11277000" />
+      <workItem from="1640264363318" duration="11609000" />
     </task>
     <servers />
   </component>
