@@ -1,6 +1,10 @@
 package de.sharetopia.productservice.product.service
 
+import de.sharetopia.productservice.product.dto.ProductDTO
+import de.sharetopia.productservice.product.model.DateRangeDuration
 import de.sharetopia.productservice.product.model.ProductModel
+import de.sharetopia.productservice.product.model.Rent
+import de.sharetopia.productservice.product.model.RentRequestModel
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.util.GeoCoder
 import org.bson.types.ObjectId
@@ -27,9 +31,17 @@ class ProductServiceImpl : ProductService {
     return productRepository.save(product)
   }
 
-  override fun partialUpdate(productId: String, product: ProductModel): ProductModel {
-    product.id = ObjectId(productId)
-    return productRepository.save(product);
+  override fun partialUpdate(productId: String, storedProductModel: ProductModel, updatedFieldsProductDTO: ProductDTO): ProductModel {
+    storedProductModel.id = ObjectId(productId)
+    return productRepository.save(storedProductModel.copy(
+      title = updatedFieldsProductDTO.title ?: storedProductModel.title,
+      description = updatedFieldsProductDTO.description ?: storedProductModel.description,
+      tags = updatedFieldsProductDTO.tags ?: storedProductModel.tags,
+      address = updatedFieldsProductDTO.address ?: storedProductModel.address,
+      location = updatedFieldsProductDTO.location ?: storedProductModel.location,
+      rentableDateRange = updatedFieldsProductDTO.rentableDateRange ?: storedProductModel.rentableDateRange,
+      rents = (updatedFieldsProductDTO.rents ?: storedProductModel.rents) as MutableList<Rent>?
+    ))
   }
 
   override fun findById(productId: String): Optional<ProductModel> {
@@ -42,5 +54,16 @@ class ProductServiceImpl : ProductService {
 
   override fun findManyById(ids: List<String>, pageable: Pageable): Page<ProductModel> {
     return productRepository.findByIdIn(ids, pageable)
+  }
+
+  override fun addRentToProduct(product: ProductModel, rentRequest: RentRequestModel): ProductModel{
+    product.rents?.add(
+      Rent(
+        rentRequest.requesterUserId,
+        DateRangeDuration(rentRequest.fromDate, rentRequest.toDate),
+        rentRequest.id.toString()
+      )
+    )
+    return productRepository.save(product)
   }
 }

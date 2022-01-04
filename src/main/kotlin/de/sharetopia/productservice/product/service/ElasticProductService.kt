@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class ElasticProductService {
@@ -21,13 +22,18 @@ class ElasticProductService {
         return elasticProductRepository.findByTitle(searchTerm, paging)
     }
 
-    fun findByTitleAndNearCoordinates(searchTerm: String, distance: Int, pageable:Pageable, lat:Double, lon: Double): Page<ElasticProductModel>{
-        return elasticProductRepository.findByTitleAndNear(searchTerm, distance, pageable, lat, lon)
+    fun findByTitleAndNearCoordinates(searchTerm: String, distance: Int, lat:Double, lon: Double, pageable:Pageable): Page<ElasticProductModel>{
+        return elasticProductRepository.findByTitleAndNear(searchTerm, distance, lat, lon, pageable)
     }
 
-    fun findByTitleAndNearCity(searchTerm: String, distance: Int, pageable: Pageable ,cityIdentifier: String): Page<ElasticProductModel>{
+    fun findByTitleAndNearCity(searchTerm: String, distance: Int ,cityIdentifier: String, pageable: Pageable): Page<ElasticProductModel>{
         val geoCodedCoordinates = GeoCoder.getCoordinatesForCity(cityIdentifier)
-        return elasticProductRepository.findByTitleAndNear(searchTerm, distance, pageable, geoCodedCoordinates[1], geoCodedCoordinates[0])
+        return elasticProductRepository.findByTitleAndNear(searchTerm, distance, geoCodedCoordinates[1], geoCodedCoordinates[0], pageable)
+    }
+
+    fun findByTitleAndNearCityWithDate(searchTerm: String, distance: Int, cityIdentifier: String, startDate: LocalDate, endDate: LocalDate, pageable: Pageable): Page<ElasticProductModel>{
+        val geoCodedCoordinates = GeoCoder.getCoordinatesForCity(cityIdentifier)
+        return elasticProductRepository.findByTitleOrTagsAndAvailabilityAndNear(searchTerm, distance, geoCodedCoordinates[1], geoCodedCoordinates[0],startDate, endDate, pageable)
     }
 
     fun deleteById(productId: String){

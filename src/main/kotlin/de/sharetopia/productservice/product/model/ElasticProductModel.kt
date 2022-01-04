@@ -11,13 +11,16 @@ public class ElasticProductModel{
 
     @Id var id: String? = null
 
+    @Field(type = FieldType.Text, name = "ownerOfProductUserId")
+    var ownerOfProductUserId: String = ""
+
     @Field(type = FieldType.Search_As_You_Type, name = "title", analyzer = "rebuilt_german")
     var title: String=""
 
     @Field(type = FieldType.Text, name = "description", analyzer = "rebuilt_german")
     var description: String=""
 
-    @Field(type = FieldType.Text, name = "tags")
+    @Field(type = FieldType.Search_As_You_Type, name = "tags", analyzer = "rebuilt_german")
     var tags: List<String> = listOf()
 
     @Field(type = FieldType.Object, name = "address")
@@ -25,5 +28,11 @@ public class ElasticProductModel{
 
     @GeoPointField
     var location: DoubleArray? = null
+
+    @Field(type = FieldType.Date_Range,name = "rentableDateRange")
+    var rentableDateRange: DateRangeDuration? = null
+
+    @Field(type = FieldType.Nested, name = "rents")
+    var rents: List<Rent>? = null
 
 }

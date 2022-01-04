@@ -3,9 +3,7 @@ package de.sharetopia.productservice
 import RestResponsePage
 import de.sharetopia.productservice.product.dto.ProductDTO
 import de.sharetopia.productservice.product.dto.ProductView
-import de.sharetopia.productservice.product.model.Address
-import de.sharetopia.productservice.product.model.ElasticProductModel
-import de.sharetopia.productservice.product.model.ProductModel
+import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ElasticProductRepository
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.util.ObjectMapperUtils
@@ -25,6 +23,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -43,7 +43,20 @@ class ProductControllerTest @Autowired constructor(
         "Description",
         listOf("Tags"),
         Address("Nobelstraße 10","Stuttgart", "70569"),
-        location = listOf(9.100591,48.7419328)
+        location = listOf(9.100591,48.7419328),
+        rentableDateRange = DateRangeDuration(
+            LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        ),
+        rents = mutableListOf(
+            Rent("3242354",
+                DateRangeDuration(
+                    LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                ),
+                "2142423535"
+            )
+        )
     )
 
     @LocalServerPort
@@ -219,7 +232,20 @@ class ProductControllerTest @Autowired constructor(
         description = "Default description",
         tags=listOf("default tag1", "default tag2"),
         address=Address("Nobelstraße 10","Stuttgart", "70569"),
-        location = listOf(0.0,0.0)
+        location = listOf(0.0,0.0),
+        rentableDateRange = DateRangeDuration(
+            LocalDate.parse("2021-01-01", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            LocalDate.parse("2025-01-01", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        ),
+        rents = mutableListOf(
+            Rent("1234",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                "235423532453453"
+                )
+            )
     )
 
 }
