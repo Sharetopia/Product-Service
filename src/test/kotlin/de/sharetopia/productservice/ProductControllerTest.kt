@@ -39,10 +39,10 @@ class ProductControllerTest @Autowired constructor(
 
     private val initialProductModel: ProductModel = ProductModel(
         ObjectId(defaultProductId),
-        "This is a Title that is interesting",
-        "Description",
-        listOf("Tags"),
-        Address("Nobelstraße 10","Stuttgart", "70569"),
+        title="This is a Title that is interesting",
+        description="Description",
+        tags=listOf("Tags"),
+        address = Address("Nobelstraße 10","Stuttgart", "70569"),
         location = listOf(9.100591,48.7419328),
         rentableDateRange = DateRangeDuration(
             LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
