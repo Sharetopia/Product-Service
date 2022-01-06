@@ -20,11 +20,11 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
-import java.net.MalformedURLException
-import java.net.URL
 import org.springframework.data.geo.Distance
 import org.springframework.data.geo.Metrics
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
+import java.net.MalformedURLException
+import java.net.URL
 
 @SpringBootApplication
 class ProductServiceApplication : CommandLineRunner {
