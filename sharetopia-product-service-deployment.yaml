@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: sharetopia-product-service
+  name: sharetopia-product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: sharetopia-product-service
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/sharetopia: "true"
+        io.kompose.service: sharetopia-product-service
+    spec:
+      containers:
+        - env:
+            - name: ELASTICSEARCH_URI
+              value: http://sharetopia-elasticsearch:9200
+            - name: MONGO_HOST
+              value: sharetopia-mongo
+          image: sharetopia-product-service
+          name: sharetopia-product-service
+          ports:
+            - containerPort: 8080
+          resources: {}
+      restartPolicy: Always
+status: {}

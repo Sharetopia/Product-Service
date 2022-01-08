@@ -4,10 +4,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
 @Component
-@ConfigurationProperties(prefix = "com.sharetopia.aws")
+@ConfigurationProperties(prefix = "de.sharetopia.aws")
 class JwtConfiguration {
-    var userPoolId: String? = null
-    var identityPoolId: String? = null
+    var userPoolId: String = "eu-central-1_sxdpyi2QD"
     var jwkUrl: String? = null
         get() = if (field != null && !field!!.isEmpty()) field else String.format(
             "https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json",
