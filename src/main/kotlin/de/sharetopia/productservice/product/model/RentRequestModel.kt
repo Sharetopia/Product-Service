@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 
 @Document(collection = "rentRequest")
-public data class RentRequestModel(@Id var id: ObjectId = ObjectId.get(),
+public data class RentRequestModel(@Id var id: String = ObjectId.get().toString(),
                                    var fromDate: LocalDate? = null,
                                    var toDate: LocalDate? = null,
                                    var requesterUserId: String? = null,

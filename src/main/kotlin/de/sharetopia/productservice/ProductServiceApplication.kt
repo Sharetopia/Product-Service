@@ -44,6 +44,7 @@ class ProductServiceApplication : CommandLineRunner {
               description = "Mein tolles neues Fahrrad hat Bremse, Hupe und Licht.",
               tags = listOf("Fahrrad", "Mobilität"),
               address = Address("Ludwigsburger Straße 11","Backnang", "71522"),
+              ownerOfProductUserId = "1234",
               //format is lng-lat
               location = listOf(9.430380,48.923069),
               rentableDateRange = DateRangeDuration(
@@ -96,9 +97,9 @@ class ProductServiceApplication : CommandLineRunner {
     elasticProductRepository.save(ObjectMapperUtils.map(savedModel, ElasticProductModel::class.java))
     elasticProductRepository.save(ObjectMapperUtils.map(savedModel1, ElasticProductModel::class.java))
 
-    val products =  productRepository.findByLocationNear(GeoJsonPoint(9.430380, 48.923069), Distance(5.0, Metrics.KILOMETERS))
+    //val products =  productRepository.findByLocationNear(GeoJsonPoint(9.430380, 48.923069), Distance(5.0, Metrics.KILOMETERS))
 
-    print(products)
+    //print(products)
   }
 
     @Bean

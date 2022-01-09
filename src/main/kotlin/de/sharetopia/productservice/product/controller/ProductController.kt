@@ -1,15 +1,13 @@
 package de.sharetopia.productservice.product.controller
 
-import de.sharetopia.productservice.product.dto.ProductDTO
-import de.sharetopia.productservice.product.dto.ProductView
-import de.sharetopia.productservice.product.dto.RentRequestDTO
-import de.sharetopia.productservice.product.dto.RentRequestView
+import de.sharetopia.productservice.product.dto.*
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
 import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.service.ElasticProductService
 import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.RentRequestService
+import de.sharetopia.productservice.product.service.UserService
 import de.sharetopia.productservice.product.util.ObjectMapperUtils
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -29,6 +27,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.security.Principal
 import java.time.LocalDate
+import java.util.*
 
 
 @RestController
@@ -40,6 +39,7 @@ class ProductController {
   @Autowired private lateinit var productService: ProductService
   @Autowired private lateinit var elasticProductService: ElasticProductService
   @Autowired private lateinit var rentRequestService: RentRequestService
+  @Autowired private lateinit var userService: UserService
 
   @Operation(summary = "Get all products", description = "Get all currently stored products")
   @ApiResponses(value = [
@@ -52,7 +52,6 @@ class ProductController {
   ])
   @GetMapping("/products")
   fun getAll(principal: Principal): List<ProductView> {
-    println(principal.name)
     return ObjectMapperUtils.mapAll(productService.findAll(), ProductView::class.java)
   }
 
@@ -66,13 +65,11 @@ class ProductController {
     )
   ])
   @PostMapping("/products")
-  fun create(@RequestBody productDTO: ProductDTO): ProductView {
-    //TODO add user id
+  fun create(@RequestBody productDTO: ProductDTO, principal: Principal): ResponseEntity<ProductView> {
+    val authenticatedUserId = principal.name
     val requestProductModel = ObjectMapperUtils.map(productDTO, ProductModel::class.java)
-    val createdProductModel = productService.create(requestProductModel)
-    var elasticProductModel = ObjectMapperUtils.map(createdProductModel, ElasticProductModel::class.java)
-    elasticProductService.save(elasticProductModel)
-    return ObjectMapperUtils.map(createdProductModel, ProductView::class.java)
+    val createdProductModel = productService.create(requestProductModel, authenticatedUserId)
+    return ResponseEntity.ok(ObjectMapperUtils.map(createdProductModel, ProductView::class.java))
   }
 
   @Operation(summary = "Update or insert product", description = "Updates/inserts product depending on if the given id already exists")
@@ -85,14 +82,13 @@ class ProductController {
     )
   ])
   @PutMapping("/products/{id}")
-  fun updateOrInsert(@PathVariable(value = "id") productId: String, @RequestBody productDTO: ProductDTO): ProductView {
-    //TODO check if userid in product is the same as principle.name
+  fun updateOrInsert(@PathVariable(value = "id") productId: String,
+                     @RequestBody productDTO: ProductDTO,
+                     principal: Principal): ResponseEntity<ProductView> {
+    val authenticatedUserId = principal.name
     val requestProductModel = ObjectMapperUtils.map(productDTO, ProductModel::class.java)
-    val updatedProductModel = productService.updateOrInsert(productId, requestProductModel)
-    var elasticProductModel = ObjectMapperUtils.map(updatedProductModel, ElasticProductModel::class.java)
-    elasticProductService.save(elasticProductModel)
-
-    return ObjectMapperUtils.map(updatedProductModel, ProductView::class.java)
+    val updatedProductModel = productService.updateOrInsert(productId, requestProductModel, authenticatedUserId)
+    return ResponseEntity.ok(ObjectMapperUtils.map(updatedProductModel, ProductView::class.java))
   }
 
   @Operation(summary = "Find product by id", description = "Returns a single product")
@@ -243,8 +239,9 @@ class ProductController {
 
   @Operation(summary = "Create rent request")
   @PostMapping("/rentRequest")
-  fun addRentRequest(@RequestBody rentRequestDTO: RentRequestDTO): RentRequestView {
-    val createdRentRequestModel = rentRequestService.create( ObjectMapperUtils.map(rentRequestDTO, RentRequestModel::class.java))
+  fun addRentRequest(@RequestBody rentRequestDTO: RentRequestDTO, principal: Principal): RentRequestView {
+    val currentUserId = principal.name
+    val createdRentRequestModel = rentRequestService.create(ObjectMapperUtils.map(rentRequestDTO, RentRequestModel::class.java), currentUserId)
     return ObjectMapperUtils.map(createdRentRequestModel, RentRequestView::class.java)
   }
 
@@ -256,5 +253,50 @@ class ProductController {
 
     return ResponseEntity<Any>(HttpStatus.OK)
   }
+
+  @Operation(summary = "Create user object for current authorized user")
+  @PostMapping("/user")
+  fun createUser(@RequestBody userDTO: UserDTO): ResponseEntity<UserModel> {
+    var user = ObjectMapperUtils.map(userDTO, UserModel::class.java)
+    var createdUser = userService.save(user)
+    return ResponseEntity.ok(createdUser)
+  }
+
+  @Operation(summary = "Gets user information about currently authorized user")
+  @GetMapping("/user")
+  fun getCurrentAuthorizedUser(principal: Principal): ResponseEntity<Optional<UserModel>> {
+    var currentUserId = principal.name
+    var user = userService.findById(currentUserId)
+    return ResponseEntity.ok(user)
+  }
+
+  @Operation(summary = "Gets user by id")
+  @GetMapping("/user/{userId}")
+  fun getUser(@PathVariable(value = "id") userId: String): ResponseEntity<Optional<UserModel>> {
+    var currentUserId = userId
+    var user = userService.findById(currentUserId)
+    return ResponseEntity.ok(user)
+  }
+
+  @Operation(summary = "Gets offered products and corresponding rent requests for authenticated user")
+  @GetMapping("/user/offeredProductsOverview")
+  fun getOfferedProductsOfUser(principal: Principal): ResponseEntity<MutableList<UserProductsWithRentRequestsView>> {
+    var currentUserId = principal.name
+    var productsAndRentRequestsForUser = productService.getProductsWithRentRequestsForUser(currentUserId)
+    return ResponseEntity.ok(productsAndRentRequestsForUser)
+  }
+
+  @Operation(summary = "Gets rent requests with corresponding products for authenticated user")
+  @GetMapping("/user/requestedProductsOverview")
+  fun getRentRequestsOfUser(principal: Principal): ResponseEntity<MutableList<UserSentRentRequestsWithProductsView>> {
+    var currentUserId = principal.name
+    var rentRequestsWithProducts = productService.getRentRequestsWithProducts(currentUserId)
+    return ResponseEntity.ok(rentRequestsWithProducts)
+  }
+
+
+
+
+
 
 }

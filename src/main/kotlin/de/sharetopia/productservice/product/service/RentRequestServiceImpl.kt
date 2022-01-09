@@ -13,7 +13,7 @@ class RentRequestServiceImpl: RentRequestService {
 
     override fun findAll(): List<RentRequestModel> = rentRequestRepository.findAll()
 
-    override fun create(rentRequest: RentRequestModel): RentRequestModel {
+    override fun create(rentRequest: RentRequestModel, userId: String): RentRequestModel {
         return rentRequestRepository.insert(rentRequest)
     }
 

@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Query
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import java.time.LocalDate
 
-public interface ElasticProductRepository: ElasticsearchRepository<ElasticProductModel, String> {
+interface ElasticProductRepository: ElasticsearchRepository<ElasticProductModel, String> {
     @Query("{ \n" +
             "    \"bool\": { \n" +
             "      \"should\": [\n" +
