@@ -1,8 +1,6 @@
 package de.sharetopia.productservice.product.service
 
-import de.sharetopia.productservice.product.dto.ProductDTO
-import de.sharetopia.productservice.product.dto.UserProductsWithRentRequestsView
-import de.sharetopia.productservice.product.dto.UserSentRentRequestsWithProductsView
+import de.sharetopia.productservice.product.dto.*
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
@@ -94,7 +92,7 @@ class ProductServiceImpl : ProductService {
     for (product in productsOfferedByUser) {
       val rentRequestsForProducts = rentRequestsForProductsOfUser.filter { it.requestedProductId == product.id.toString()}
       val currentProductRentView = ObjectMapperUtils.map(product, UserProductsWithRentRequestsView::class.java)
-      currentProductRentView.rentRequests = rentRequestsForProducts
+      currentProductRentView.rentRequests = ObjectMapperUtils.mapAll(rentRequestsForProducts, RentRequestView::class.java)
       productsWithRentRequests.add(currentProductRentView)
     }
     return productsWithRentRequests
@@ -108,7 +106,7 @@ class ProductServiceImpl : ProductService {
     val rentRequestsWithProduct: MutableList<UserSentRentRequestsWithProductsView> = mutableListOf()
     for (rentRequest in rentRequestsByUser) {
       val productOfRentRequest = requestedProducts.first { it.id.toString() == rentRequest.requestedProductId}
-      rentRequestsWithProduct.add(UserSentRentRequestsWithProductsView(rentRequest, productOfRentRequest))
+      rentRequestsWithProduct.add(UserSentRentRequestsWithProductsView(ObjectMapperUtils.map(rentRequest, RentRequestView::class.java), ObjectMapperUtils.map(productOfRentRequest, ProductView::class.java)))
     }
     return rentRequestsWithProduct
   }

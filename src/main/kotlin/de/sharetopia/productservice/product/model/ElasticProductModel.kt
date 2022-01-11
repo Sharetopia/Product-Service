@@ -2,7 +2,7 @@ package de.sharetopia.productservice.product.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.*
-
+import java.math.BigDecimal
 
 
 @Document(indexName = "product")
@@ -22,6 +22,9 @@ public class ElasticProductModel{
 
     @Field(type = FieldType.Search_As_You_Type, name = "tags", analyzer = "rebuilt_german")
     var tags: List<String> = listOf()
+
+    @Field(type = FieldType.Float, name = "price")
+    var price: BigDecimal = BigDecimal.ZERO
 
     @Field(type = FieldType.Object, name = "address")
     var address: Address = Address("","","")

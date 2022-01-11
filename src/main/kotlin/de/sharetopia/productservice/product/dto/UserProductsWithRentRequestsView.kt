@@ -23,5 +23,5 @@ class UserProductsWithRentRequestsView {
     lateinit var location: List<Double>
     lateinit var rentableDateRange: DateRangeDuration
     lateinit var rents: List<Rent>
-    lateinit var rentRequests: List<RentRequestModel>
+    lateinit var rentRequests: List<RentRequestView>
 }
