@@ -6,9 +6,11 @@ import com.amazonaws.auth.AnonymousAWSCredentials
 import com.amazonaws.auth.profile.internal.ProfileKeyConstants.REGION
 import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClientBuilder
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider
+import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder
 import com.amazonaws.services.cognitoidp.model.AdminInitiateAuthRequest
 import com.amazonaws.services.cognitoidp.model.AuthFlowType
 import com.amazonaws.services.cognitoidp.model.AuthenticationResultType
+import com.amazonaws.services.cognitoidp.model.InitiateAuthRequest
 import de.sharetopia.productservice.product.dto.ProductDTO
 import de.sharetopia.productservice.product.dto.ProductView
 import de.sharetopia.productservice.product.model.*
@@ -83,11 +85,12 @@ class ProductControllerTest @Autowired constructor(
 
     fun getAmazonCognitoIdentityClient(): AWSCognitoIdentityProvider? {
         val awsCreds = AnonymousAWSCredentials()
-        val provider = AmazonCognitoIdentityClientBuilder
+        val provider = AWSCognitoIdentityProviderClientBuilder
             .standard()
             .withCredentials(AWSStaticCredentialsProvider(awsCreds))
             .withRegion(testRegion)
             .build()
+        return provider
     }
 
     fun login(username: String, password: String): String {
@@ -98,20 +101,16 @@ class ProductControllerTest @Autowired constructor(
         authParams["USERNAME"] = username
         authParams["PASSWORD"] = password
 
-        val authRequest = AdminInitiateAuthRequest()
-        authRequest.withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
+        val authRequest = InitiateAuthRequest()
+        authRequest.withAuthFlow(AuthFlowType.USER_PASSWORD_AUTH)
             .withClientId(testClientId)
-            .withUserPoolId(testUserPoolId)
             .withAuthParameters(authParams)
 
-        val result = cognitoClient!!.adminInitiateAuth(authRequest)
+        val result = cognitoClient!!.initiateAuth(authRequest)
 
-        if (result.challengeName !="") {
-            throw Exception("Test user requires a challenge for authentication")
-        }
 
         authenticationResult = result.authenticationResult
-        cognitoClient.shutdown()
+        //cognitoClient.shutdown()
         return authenticationResult.accessToken
     }
 
