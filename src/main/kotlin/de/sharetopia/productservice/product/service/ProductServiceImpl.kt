@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.util.*
 
 
@@ -53,6 +54,7 @@ class ProductServiceImpl : ProductService {
     return productRepository.save(storedProductModel.copy(
       title = updatedFieldsProductDTO.title ?: storedProductModel.title,
       description = updatedFieldsProductDTO.description ?: storedProductModel.description,
+      price = if(updatedFieldsProductDTO.price!= BigDecimal.ZERO) updatedFieldsProductDTO.price else storedProductModel.price,
       tags = updatedFieldsProductDTO.tags ?: storedProductModel.tags,
       address = updatedFieldsProductDTO.address ?: storedProductModel.address,
       location = updatedFieldsProductDTO.location ?: storedProductModel.location,

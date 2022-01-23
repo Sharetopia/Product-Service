@@ -29,6 +29,9 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-data-rest:1.6.2")
 	implementation("org.springdoc:springdoc-openapi-ui:1.6.2")
 	implementation("org.springdoc:springdoc-openapi-kotlin:1.6.2")
+	implementation("com.amazonaws:aws-java-sdk:1.12.145")
+	implementation("com.amazonaws:aws-java-sdk-core:1.12.145")
+	implementation("com.amazonaws:aws-java-sdk-cognitoidp:1.12.145")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
 }
