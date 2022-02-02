@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.security.Principal
 import java.util.*
 
 @Service
@@ -16,7 +17,8 @@ class UserService {
     @Autowired
     private lateinit var userRepository: UserRepository
 
-    fun save(user: UserModel): UserModel {
+    fun save(user: UserModel, userId: String): UserModel {
+        user.id = userId
         return userRepository.save(user)
     }
 

@@ -3,6 +3,7 @@ package de.sharetopia.productservice.product.controller
 import de.sharetopia.productservice.product.dto.*
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
 import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
+import de.sharetopia.productservice.product.exception.UserNotFoundException
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.service.ElasticProductService
 import de.sharetopia.productservice.product.service.ProductService
@@ -256,25 +257,24 @@ class ProductController {
 
   @Operation(summary = "Create user object for current authorized user")
   @PostMapping("/user")
-  fun createUser(@RequestBody userDTO: UserDTO): ResponseEntity<UserModel> {
+  fun createUser(@RequestBody userDTO: UserDTO, principal: Principal): ResponseEntity<UserView> {
     var user = ObjectMapperUtils.map(userDTO, UserModel::class.java)
-    var createdUser = userService.save(user)
-    return ResponseEntity.ok(createdUser)
+    var createdUser = userService.save(user, principal.name)
+    return ResponseEntity.ok(ObjectMapperUtils.map(createdUser, UserView::class.java))
   }
 
   @Operation(summary = "Gets user information about currently authorized user")
   @GetMapping("/user")
-  fun getCurrentAuthorizedUser(principal: Principal): ResponseEntity<Optional<UserModel>> {
+  fun getCurrentAuthorizedUser(principal: Principal): ResponseEntity<UserView> {
     var currentUserId = principal.name
-    var user = userService.findById(currentUserId)
-    return ResponseEntity.ok(user)
+    var user = userService.findById(currentUserId).orElseThrow{UserNotFoundException(currentUserId)}
+    return ResponseEntity.ok(ObjectMapperUtils.map(user, UserView::class.java))
   }
 
   @Operation(summary = "Gets user by id")
   @GetMapping("/user/{userId}")
   fun getUser(@PathVariable(value = "id") userId: String): ResponseEntity<Optional<UserModel>> {
-    var currentUserId = userId
-    var user = userService.findById(currentUserId)
+    var user = userService.findById(userId)
     return ResponseEntity.ok(user)
   }
 
@@ -282,6 +282,7 @@ class ProductController {
   @GetMapping("/user/offeredProductsOverview")
   fun getOfferedProductsOfUser(principal: Principal): ResponseEntity<MutableList<UserProductsWithRentRequestsView>> {
     var currentUserId = principal.name
+
     var productsAndRentRequestsForUser = productService.getProductsWithRentRequestsForUser(currentUserId)
     return ResponseEntity.ok(productsAndRentRequestsForUser)
   }
