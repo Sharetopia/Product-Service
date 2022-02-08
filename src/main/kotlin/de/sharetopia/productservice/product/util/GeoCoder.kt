@@ -1,5 +1,6 @@
 package de.sharetopia.productservice.product.util
 
+import de.sharetopia.productservice.product.exception.LocationNotFoundException
 import de.sharetopia.productservice.product.model.Address
 import de.sharetopia.productservice.product.model.geoCodeApiResponse.GeoCodedAddress
 import org.springframework.http.HttpEntity
@@ -32,10 +33,10 @@ object GeoCoder {
         )
 
         val geoResult = response.body
-        return if (geoResult != null) {
+        return if (geoResult != null && geoResult.features.isNotEmpty()) {
             geoResult.features[0].geometry.coordinates
         } else{
-            (listOf(0.0,0.0)) //TODO throw exception?
+            throw LocationNotFoundException(address.toString())
         }
 
     }
@@ -50,10 +51,10 @@ object GeoCoder {
         )
 
         val geoResult = response.body
-        return if (geoResult != null) {
+        return if (geoResult != null && geoResult.features.isNotEmpty()) {
             geoResult.features[0].geometry.coordinates
         } else{
-            (listOf(0.0,0.0)) //TODO throw exception?
+            throw LocationNotFoundException(nameOrZip)
         }
 
     }

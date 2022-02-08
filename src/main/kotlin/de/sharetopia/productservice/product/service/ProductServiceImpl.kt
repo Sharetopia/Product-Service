@@ -6,7 +6,6 @@ import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
 import de.sharetopia.productservice.product.util.GeoCoder
 import de.sharetopia.productservice.product.util.ObjectMapperUtils
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

@@ -3,7 +3,6 @@ package de.sharetopia.productservice.product.dto
 import de.sharetopia.productservice.product.model.Address
 import de.sharetopia.productservice.product.model.DateRangeDuration
 import de.sharetopia.productservice.product.model.Rent
-import de.sharetopia.productservice.product.model.RentRequestModel
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
 import java.math.BigDecimal
