@@ -5,8 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7f43bb12-0405-4c94-ab34-f39658e42a8b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/ProductServiceApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/ProductServiceApplication.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/ProductController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/ProductController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/exception/ProductErrorResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/exception/ErrorResponse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/exception/ProductExceptionHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/exception/ProductExceptionHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductServiceImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductServiceImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/ProductControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/ProductControllerTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,6 +27,16 @@
       <ProjectState />
     </projectState>
   </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view />
+      </state>
+    </system>
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -27,6 +46,14 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="ProjectId" id="24kmyXF7sVwxAATfMeuiakP8KVE" />
   <component name="ProjectViewState">
@@ -38,13 +65,97 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
   </component>
-  <component name="RunManager">
-    <configuration name="ProductControllerTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.ProductServiceTest.should return updated product after partial update">
+    <configuration name="ProductServiceTest.find many by ids" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductControllerTest&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.find many by ids&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="ProductServiceTest.should return created product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.should return created product&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="ProductServiceTest.should return product by id" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.should return product by id&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="ProductServiceTest.should return updated product after partial update" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.should return updated product after partial update&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="ProductServiceTest.should update existing product by calling updateOrInsert for existing product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.should update existing product by calling updateOrInsert for existing product&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -62,7 +173,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.ProductControllerTest" />
+        <item itemvalue="Gradle.ProductServiceTest.should return updated product after partial update" />
+        <item itemvalue="Gradle.ProductServiceTest.find many by ids" />
+        <item itemvalue="Gradle.ProductServiceTest.should return created product" />
+        <item itemvalue="Gradle.ProductServiceTest.should return product by id" />
+        <item itemvalue="Gradle.ProductServiceTest.should update existing product by calling updateOrInsert for existing product" />
       </list>
     </recent_temporary>
   </component>

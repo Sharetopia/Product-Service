@@ -1,9 +1,8 @@
 package de.sharetopia.productservice.product.controller
 
 import de.sharetopia.productservice.product.dto.*
+import de.sharetopia.productservice.product.exception.NotAllowedAccessToResource
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
-import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
-import de.sharetopia.productservice.product.exception.UserNotFoundException
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.service.ElasticProductService
 import de.sharetopia.productservice.product.service.ProductService
@@ -17,6 +16,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -28,7 +29,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.security.Principal
 import java.time.LocalDate
-import java.util.*
 
 
 @RestController
@@ -36,6 +36,9 @@ import java.util.*
 @RequestMapping("/api/v1/")
 @Tag(name = "Products", description = "Endpoints for managing product listings")
 class ProductController {
+
+  private val log: Logger = LoggerFactory.getLogger(ProductController::class.java)
+
 
   @Autowired private lateinit var productService: ProductService
   @Autowired private lateinit var elasticProductService: ElasticProductService
@@ -53,6 +56,7 @@ class ProductController {
   ])
   @GetMapping("/products")
   fun getAll(principal: Principal): List<ProductView> {
+    log.info("Created product. [method=GET, endpoint=/products, requesterUserId=${principal.name}]")
     return ObjectMapperUtils.mapAll(productService.findAll(), ProductView::class.java)
   }
 
@@ -70,6 +74,7 @@ class ProductController {
     val authenticatedUserId = principal.name
     val requestProductModel = ObjectMapperUtils.map(productDTO, ProductModel::class.java)
     val createdProductModel = productService.create(requestProductModel, authenticatedUserId)
+    log.info("Created product. [method=POST, endpoint=/products, productId=${createdProductModel.id}, requesterUserId=${principal.name}]")
     return ResponseEntity.ok(ObjectMapperUtils.map(createdProductModel, ProductView::class.java))
   }
 
@@ -89,6 +94,7 @@ class ProductController {
     val authenticatedUserId = principal.name
     val requestProductModel = ObjectMapperUtils.map(productDTO, ProductModel::class.java)
     val updatedProductModel = productService.updateOrInsert(productId, requestProductModel, authenticatedUserId)
+    log.info("Updated/inserted product. [method=PUT, endpoint=/products, productId=${updatedProductModel.id}, requesterUserId=${principal.name}]")
     return ResponseEntity.ok(ObjectMapperUtils.map(updatedProductModel, ProductView::class.java))
   }
 
@@ -106,11 +112,10 @@ class ProductController {
     )
   ])
   @GetMapping("/products/{id}")
-  fun getById(@PathVariable(value = "id") productId: String): ResponseEntity<ProductView> {
-    return productService
-        .findById(productId)
-        .map { prd -> ResponseEntity.ok(ObjectMapperUtils.map(prd, ProductView::class.java)) }
-        .orElseThrow { ProductNotFoundException(productId) }
+  fun getById(@PathVariable(value = "id") productId: String, principal: Principal): ResponseEntity<ProductView> {
+    val requestedProduct = productService.findById(productId).orElseThrow { ProductNotFoundException(productId) }
+    log.info("Updated/inserted product. [method=PUT, endpoint=/products, requesterUserId=${principal.name}]")
+    return ResponseEntity.ok(ObjectMapperUtils.map(requestedProduct, ProductView::class.java))
   }
 
   @Operation(summary = "Find multiple products by id", description = "Returns products for the given ids")
@@ -124,8 +129,7 @@ class ProductController {
   ])
   @GetMapping("/products/batch/{ids}")
   fun getByMultipleIds(@PathVariable(value = "ids") productIdList: List<String>, @RequestParam(defaultValue = "0") pageNo: Int,
-                       @RequestParam(defaultValue = "10") pageSize: Int): Page<ProductView> {
-
+                       @RequestParam(defaultValue = "10") pageSize: Int, principal: Principal): Page<ProductView> {
     val paging: Pageable = PageRequest.of(pageNo, pageSize)
     var foundProducts = productService.findManyById(productIdList, paging)
     return ObjectMapperUtils.mapEntityPageIntoDtoPage(foundProducts, ProductView::class.java)
@@ -188,12 +192,13 @@ class ProductController {
     )
   ])
   @DeleteMapping("/products/{id}")
-  fun deleteById(@PathVariable(value = "id") productId: String): ResponseEntity<Any> {
-    productService.findById(productId).orElseThrow { ProductNotFoundException(productId) }
+  fun deleteById(@PathVariable(value = "id") productId: String, principal: Principal): ResponseEntity<Any> {
+    val productToBeDeleted = productService.findById(productId).orElseThrow { ProductNotFoundException(productId) }
+    if(productToBeDeleted.ownerOfProductUserId!=principal.name){
+      throw NotAllowedAccessToResource(principal.name)
+    }
     productService.deleteById(productId)
-
     elasticProductService.deleteById(productId)
-
     return ResponseEntity<Any>(HttpStatus.OK)
   }
 
@@ -211,8 +216,13 @@ class ProductController {
     )
   ])
   @PatchMapping("/products/{id}")
-  fun partialUpdate(@PathVariable(value = "id") productId: String, @RequestBody updatedFieldsProductDTO: ProductDTO): ProductView {
+  fun partialUpdate(@PathVariable(value = "id") productId: String, @RequestBody updatedFieldsProductDTO: ProductDTO, principal: Principal): ProductView {
     val storedProductModel = productService.findById(productId).orElseThrow { ProductNotFoundException(productId) }
+
+    if(storedProductModel.ownerOfProductUserId!=principal.name){
+      throw NotAllowedAccessToResource(principal.name)
+    }
+
     val updatedProduct = productService.partialUpdate(productId, storedProductModel, updatedFieldsProductDTO)
 
     elasticProductService.save(ObjectMapperUtils.map(updatedProduct, ElasticProductModel::class.java))
@@ -221,21 +231,11 @@ class ProductController {
 
   @Operation(summary = "Accept/reject rent request for product", description = "Endpoint to accept or reject a certain rent request (rr) for a given product. If accepted the according rent is added to product and rent request status is set accordingly")
   @PostMapping("/products/{id}/rent/{rentRequestId}")
-  fun acceptOrRejectRentRequest(@PathVariable(value = "id") productId: String, @PathVariable(value = "rentRequestId") rentRequestId: String, @RequestParam("isAccepted") isAccepted: Boolean): RentRequestView {
-    var rentRequest = rentRequestService.findById(rentRequestId).orElseThrow { RentRequestNotFoundException(rentRequestId) }
-    var product = productService.findById(productId).orElseThrow { ProductNotFoundException(productId) }
-
-    if(rentRequest.requestedProductId!=productId){
-      throw ResponseStatusException(HttpStatus.NOT_FOUND, "Product id specified in URL does not match product id in rent request")
-    }
-
-    if(isAccepted) {
-      var updatedModel = productService.addRentToProduct(product, rentRequest)
-      var elasticProductModel = ObjectMapperUtils.map(updatedModel, ElasticProductModel::class.java)
-      elasticProductService.save(elasticProductModel)
-    }
-    var updatedRentRequest = rentRequestService.updateStatus(newStatus = if(isAccepted) "accepted" else "rejected", rentRequest)
-    return ObjectMapperUtils.map(updatedRentRequest, RentRequestView::class.java)
+  fun acceptOrRejectRentRequest(@PathVariable(value = "id") productId: String, @PathVariable(value = "rentRequestId") rentRequestId: String, @RequestParam("isAccepted") isAccepted: Boolean, principal: Principal): RentRequestView {
+    return ObjectMapperUtils.map(
+      productService.acceptOrRejectRentRequest(productId, rentRequestId, isAccepted, principal.name),
+      RentRequestView::class.java
+    )
   }
 
   @Operation(summary = "Create rent request")
@@ -248,56 +248,13 @@ class ProductController {
 
   @Operation(summary = "Delete certain rent request")
   @DeleteMapping("/rentRequest/{id}")
-  fun deleteByRentRequestId(@PathVariable(value = "id") rentRequestId: String): ResponseEntity<Any> {
-    rentRequestService.findById(rentRequestId).orElseThrow { ProductNotFoundException(rentRequestId) }
+  fun deleteByRentRequestId(@PathVariable(value = "id") rentRequestId: String, principal: Principal): ResponseEntity<Any> {
+    val rentRequestToBeDeleted = rentRequestService.findById(rentRequestId).orElseThrow { ProductNotFoundException(rentRequestId) }
+    if(rentRequestToBeDeleted.requesterUserId!=principal.name){
+      throw NotAllowedAccessToResource(principal.name)
+    }
     rentRequestService.deleteById(rentRequestId)
 
     return ResponseEntity<Any>(HttpStatus.OK)
   }
-
-  @Operation(summary = "Create user object for current authorized user")
-  @PostMapping("/user")
-  fun createUser(@RequestBody userDTO: UserDTO, principal: Principal): ResponseEntity<UserView> {
-    var user = ObjectMapperUtils.map(userDTO, UserModel::class.java)
-    var createdUser = userService.save(user, principal.name)
-    return ResponseEntity.ok(ObjectMapperUtils.map(createdUser, UserView::class.java))
-  }
-
-  @Operation(summary = "Gets user information about currently authorized user")
-  @GetMapping("/user")
-  fun getCurrentAuthorizedUser(principal: Principal): ResponseEntity<UserView> {
-    var currentUserId = principal.name
-    var user = userService.findById(currentUserId).orElseThrow{UserNotFoundException(currentUserId)}
-    return ResponseEntity.ok(ObjectMapperUtils.map(user, UserView::class.java))
-  }
-
-  @Operation(summary = "Gets user by id")
-  @GetMapping("/user/{id}")
-  fun getUser(@PathVariable(value = "id") id: String): ResponseEntity<Optional<UserModel>> {
-    var user = userService.findById(id)
-    return ResponseEntity.ok(user)
-  }
-
-  @Operation(summary = "Gets offered products and corresponding rent requests for authenticated user")
-  @GetMapping("/user/offeredProductsOverview")
-  fun getOfferedProductsOfUser(principal: Principal): ResponseEntity<MutableList<UserProductsWithRentRequestsView>> {
-    var currentUserId = principal.name
-
-    var productsAndRentRequestsForUser = productService.getProductsWithRentRequestsForUser(currentUserId)
-    return ResponseEntity.ok(productsAndRentRequestsForUser)
-  }
-
-  @Operation(summary = "Gets rent requests with corresponding products for authenticated user")
-  @GetMapping("/user/requestedProductsOverview")
-  fun getRentRequestsOfUser(principal: Principal): ResponseEntity<MutableList<UserSentRentRequestsWithProductsView>> {
-    var currentUserId = principal.name
-    var rentRequestsWithProducts = productService.getRentRequestsWithProducts(currentUserId)
-    return ResponseEntity.ok(rentRequestsWithProducts)
-  }
-
-
-
-
-
-
 }

@@ -1,6 +1,10 @@
 package de.sharetopia.productservice.product.service
 
 import de.sharetopia.productservice.product.dto.*
+import de.sharetopia.productservice.product.exception.ProductNotFoundException
+import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
+import de.sharetopia.productservice.product.exception.productIdUrlBodyMismatchException
+import de.sharetopia.productservice.product.exception.NotAllowedAccessToResource
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
@@ -18,6 +22,7 @@ import java.util.*
 class ProductServiceImpl : ProductService {
   @Autowired private lateinit var productRepository: ProductRepository
   @Autowired private lateinit var elasticProductService: ElasticProductService
+  @Autowired private lateinit var rentRequestService: RentRequestService
   @Autowired private lateinit var rentRequestRepository: RentRequestRepository
 
   override fun findAll(): List<ProductModel> = productRepository.findAll()
@@ -34,6 +39,13 @@ class ProductServiceImpl : ProductService {
   }
 
   override fun updateOrInsert(productId: String, product: ProductModel, userId: String): ProductModel{
+    val existingProduct = productRepository.findById(productId)
+    if(existingProduct.isPresent){
+      if(existingProduct.get().ownerOfProductUserId!=userId){
+        throw NotAllowedAccessToResource(userId)
+      }
+    }
+
     product.id = productId
     product.location = GeoCoder.getCoordinatesForAddress(product.address)
     product.ownerOfProductUserId = userId
@@ -72,6 +84,34 @@ class ProductServiceImpl : ProductService {
 
   override fun findManyById(ids: List<String>, pageable: Pageable): Page<ProductModel> {
     return productRepository.findByIdIn(ids, pageable)
+
+  }
+
+  override fun acceptOrRejectRentRequest(
+    productId: String,
+    rentRequestId: String,
+    isAccepted: Boolean,
+    userId: String
+  ): RentRequestModel {
+    var rentRequest =
+      rentRequestService.findById(rentRequestId).orElseThrow { RentRequestNotFoundException(rentRequestId) }
+    var product = findById(productId).orElseThrow { ProductNotFoundException(productId) }
+
+    if (rentRequest.requestedProductId != productId) {
+      throw productIdUrlBodyMismatchException(
+        productId,
+        rentRequest.requestedProductId!!
+      )
+    }
+    if(product.ownerOfProductUserId!=userId){
+      throw NotAllowedAccessToResource(userId)
+    }
+    if (isAccepted) {
+      var updatedModel = addRentToProduct(product, rentRequest)
+      var elasticProductModel = ObjectMapperUtils.map(updatedModel, ElasticProductModel::class.java)
+      elasticProductService.save(elasticProductModel)
+    }
+    return rentRequestService.updateStatus(newStatus = if (isAccepted) "accepted" else "rejected", rentRequest)
   }
 
   override fun addRentToProduct(product: ProductModel, rentRequest: RentRequestModel): ProductModel {

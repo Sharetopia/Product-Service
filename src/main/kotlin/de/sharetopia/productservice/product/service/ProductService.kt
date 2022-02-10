@@ -24,11 +24,12 @@ interface ProductService {
 
   fun findManyById(ids: List<String>, pageable: Pageable): Page<ProductModel>
 
+  fun acceptOrRejectRentRequest(productId: String, rentRequestId: String, isAccepted: Boolean, userId: String): RentRequestModel
+
   fun addRentToProduct(product: ProductModel, rentRequest: RentRequestModel): ProductModel
 
   fun getProductsWithRentRequestsForUser(userId: String): MutableList<UserProductsWithRentRequestsView>
 
   fun getRentRequestsWithProducts(userId: String): MutableList<UserSentRentRequestsWithProductsView>
 
-  //fun rejectRent(product: ProductModel, rentRequestId: String): ProductModel
 }
