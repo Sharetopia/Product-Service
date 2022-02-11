@@ -495,7 +495,7 @@ class ProductControllerTest @Autowired constructor(
 
     @Test
     fun `should create new user`() {
-        val userRequest = UserDTO("www.test.de/12312498", name="Thomas Test", postalCode="12345")
+        val userRequest = UserDTO(profilePictureURL="www.test.de/12312498", forename="Thomas", surname="test", postalCode="12345", address="test", city="test", rating="2")
 
         val headers = HttpHeaders()
         headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
@@ -512,13 +512,13 @@ class ProductControllerTest @Autowired constructor(
         assertNotNull(response.body)
         assertEquals(testUser1Id, response.body?.id)
         assertEquals(userRequest.profilePictureURL, response.body?.profilePictureURL)
-        assertEquals(userRequest.name, response.body?.name)
+        assertEquals(userRequest.forename, response.body?.forename)
 
     }
 
     @Test
     fun `should return current authorized user`(){
-        val userToCreate = UserModel(testUser1Id, "www.test.de/12312498", name="Thomas Test", postalCode="12345")
+        val userToCreate = UserModel(id=testUser1Id, profilePictureURL="www.test.de/12312498", forename="Thomas", surname="test", postalCode="12345", address="test", city="test", rating="2")
         userRepository.save(userToCreate)
 
         val headers = HttpHeaders()
