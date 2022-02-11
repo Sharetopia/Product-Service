@@ -5,15 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7f43bb12-0405-4c94-ab34-f39658e42a8b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/ProductServiceApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/ProductServiceApplication.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/dto/UserDTO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/dto/UserDTO.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/dto/UserProductsWithRentRequestsView.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/dto/UserProductsWithRentRequestsView.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/dto/UserSentRentRequestsWithProductsView.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/dto/UserSentRentRequestsWithProductsView.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/model/UserModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/model/UserModel.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/repository/RentRequestRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/repository/RentRequestRepository.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductServiceImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductServiceImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/UserService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/UserService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/util/GeoCoder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/util/GeoCoder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/ProductController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/ProductController.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

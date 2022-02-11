@@ -272,9 +272,9 @@ class ProductController {
   }
 
   @Operation(summary = "Gets user by id")
-  @GetMapping("/user/{userId}")
-  fun getUser(@PathVariable(value = "id") userId: String): ResponseEntity<Optional<UserModel>> {
-    var user = userService.findById(userId)
+  @GetMapping("/user/{id}")
+  fun getUser(@PathVariable(value = "id") id: String): ResponseEntity<Optional<UserModel>> {
+    var user = userService.findById(id)
     return ResponseEntity.ok(user)
   }
 
