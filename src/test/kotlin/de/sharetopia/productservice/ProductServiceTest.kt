@@ -2,10 +2,7 @@ package de.sharetopia.productservice
 
 import RestResponsePage
 import de.sharetopia.productservice.product.dto.ProductDTO
-import de.sharetopia.productservice.product.model.Address
-import de.sharetopia.productservice.product.model.DateRangeDuration
-import de.sharetopia.productservice.product.model.ProductModel
-import de.sharetopia.productservice.product.model.Rent
+import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
 import de.sharetopia.productservice.product.service.ElasticProductService
@@ -13,19 +10,25 @@ import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.ProductServiceImpl
 import de.sharetopia.productservice.product.service.RentRequestService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.*
+import org.mockito.MockitoAnnotations
+import org.mockito.verification.After
 import org.springframework.data.domain.PageRequest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
+import org.mockito.kotlin.any
 
 
 @ExtendWith(SpringExtension::class)
@@ -45,6 +48,11 @@ class ProductServiceTest {
 
     @InjectMocks
     var productService: ProductService = ProductServiceImpl()
+
+    @BeforeEach
+    fun setup(){
+        MockitoAnnotations.openMocks(this)
+    }
 
     @Test
     fun `should return all products as a list`() {
@@ -150,7 +158,7 @@ class ProductServiceTest {
             productService.create(productToCreate, userId = "204e1304-26f0-47b5-b353-cee12f4c8d34")
 
 
-        verify(elasticProductService, times(1))
+
         assertEquals(productToCreate.id, productReturnedByService.id)
         assertEquals(productToCreate.title, productReturnedByService.title)
         assertEquals(productToCreate.description, productReturnedByService.description)
@@ -227,7 +235,7 @@ class ProductServiceTest {
         val productReturnedByService =
             productService.updateOrInsert("12345", updateProduct, userId = "204e1304-26f0-47b5-b353-cee12f4c8d34")
 
-        verify(elasticProductService, times(1))
+        verify(elasticProductService, times(1)).save(any())
         assertEquals(updateProduct.title, productReturnedByService.title)
         assertEquals(updateProduct.description, productReturnedByService.description)
         assertThat(updateProduct.address).usingRecursiveComparison().isEqualTo(productReturnedByService.address)
@@ -272,31 +280,31 @@ class ProductServiceTest {
                 description = "Das ist mein blaues Rennrad"
             )
 
-        `when`(productRepository.save(any(ProductModel::class.java))).thenReturn(
-            ProductModel(
-                id = "12345",
-                title = "Rennrad Blau",
-                description = "Das ist mein blaues Rennrad",
-                ownerOfProductUserId = "204e1304-26f0-47b5-b353-cee12f4c8d34",
-                tags = listOf("Fahrrad", "Mobilität"),
-                price = BigDecimal(12.99),
-                address = Address("Nobelstraße 10", "Stuttgart", "70569"),
-                rentableDateRange = DateRangeDuration(
-                    LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                    LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                ),
-                rents = mutableListOf(
-                    Rent(
-                        "3242354",
-                        DateRangeDuration(
-                            LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                            LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                        ),
-                        "2142423535"
-                    )
+        val updatedModel = ProductModel(
+            id = "12345",
+            title = "Rennrad Blau",
+            description = "Das ist mein blaues Rennrad",
+            ownerOfProductUserId = "204e1304-26f0-47b5-b353-cee12f4c8d34",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
                 )
             )
         )
+        `when`(productRepository.save(any(ProductModel::class.java))).thenReturn(updatedModel)
+
 
         //test
         val productReturnedByService = productService.partialUpdate("12345", mockedProductInDb, updateFieldsProduct)
@@ -307,7 +315,6 @@ class ProductServiceTest {
         })
 
         verify(productRepository, times(1)).save(any(ProductModel::class.java))
-        verify(elasticProductService, times(1))
 
         assertEquals(updateFieldsProduct.title, productReturnedByService.title)
         assertEquals(updateFieldsProduct.description, productReturnedByService.description)
@@ -364,10 +371,8 @@ class ProductServiceTest {
     @Test
     fun `should delete product by id`() {
         val idOfProductToDelete = "12345"
-        doNothing().`when`(productRepository.deleteById(idOfProductToDelete))
         productService.deleteById(idOfProductToDelete)
         verify(productRepository, times(1)).deleteById(idOfProductToDelete)
-        verify(elasticProductService, times(1))
     }
 
     @Test
@@ -441,11 +446,10 @@ class ProductServiceTest {
         //test
         val productListReturnedByService = productService.findManyById(listOf("12345", "5678"), PageRequest.of(0, 10))
 
-
         assertEquals(2, productListReturnedByService.size)
         assertEquals("12345", productListReturnedByService.content[0].id)
         assertEquals("5678", productListReturnedByService.content[1].id)
-        verify(productRepository, times(1))
+        verify(productRepository, times(1)).findByIdIn(anyList(), any())
     }
 
     @Test

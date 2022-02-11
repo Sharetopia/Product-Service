@@ -24,7 +24,7 @@ class ProductExceptionHandler {
 
     @ExceptionHandler(
         productIdUrlBodyMismatchException::class,
-        invalidDateRangeSearchException::class,
+        InvalidDateRangeSearchException::class,
     )
     fun handleBadRequestException(exc : HttpException) : ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(
@@ -36,7 +36,7 @@ class ProductExceptionHandler {
     }
 
     @ExceptionHandler(
-        NotAllowedAccessToResource::class
+        NotAllowedAccessToResourceException::class
     )
     fun handleNotAllowedAccessRequestException(exc : HttpException) : ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(

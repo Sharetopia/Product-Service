@@ -5,7 +5,7 @@ import de.sharetopia.productservice.product.dto.UserProductsWithRentRequestsView
 import de.sharetopia.productservice.product.dto.UserSentRentRequestsWithProductsView
 import de.sharetopia.productservice.product.dto.UserView
 import de.sharetopia.productservice.product.exception.UserNotFoundException
-import de.sharetopia.productservice.product.exception.NotAllowedAccessToResource
+import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
 import de.sharetopia.productservice.product.model.UserModel
 import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.UserService
@@ -48,7 +48,7 @@ class UserController {
     @GetMapping("/user/{userId}")
     fun getUser(@PathVariable(value = "id") userId: String, principal: Principal): ResponseEntity<Optional<UserModel>> {
         if(principal.name!=userId){
-            throw NotAllowedAccessToResource(principal.name)
+            throw NotAllowedAccessToResourceException(principal.name)
         }
         var user = userService.findById(userId)
         return ResponseEntity.ok(user)

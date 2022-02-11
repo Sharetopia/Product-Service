@@ -4,7 +4,7 @@ import de.sharetopia.productservice.product.dto.*
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
 import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
 import de.sharetopia.productservice.product.exception.productIdUrlBodyMismatchException
-import de.sharetopia.productservice.product.exception.NotAllowedAccessToResource
+import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
@@ -42,7 +42,7 @@ class ProductServiceImpl : ProductService {
     val existingProduct = productRepository.findById(productId)
     if(existingProduct.isPresent){
       if(existingProduct.get().ownerOfProductUserId!=userId){
-        throw NotAllowedAccessToResource(userId)
+        throw NotAllowedAccessToResourceException(userId)
       }
     }
 
@@ -104,7 +104,7 @@ class ProductServiceImpl : ProductService {
       )
     }
     if(product.ownerOfProductUserId!=userId){
-      throw NotAllowedAccessToResource(userId)
+      throw NotAllowedAccessToResourceException(userId)
     }
     if (isAccepted) {
       var updatedModel = addRentToProduct(product, rentRequest)

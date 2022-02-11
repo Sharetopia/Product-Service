@@ -129,6 +129,25 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
+    fun `should return NOT FOUND when trying to access non existing product`() {
+        saveOneProduct(initialProductModel)
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
+        val entity = HttpEntity<String>(headers)
+
+        val response = restTemplate.exchange(
+            getRootUrl() + "/products/9999",
+            HttpMethod.GET,
+            entity,
+            ErrorResponse::class.java
+        )
+
+        assertEquals(404, response.statusCode.value())
+        assertEquals(ProductNotFoundException("9999").message, response.body?.message)
+    }
+
+    @Test
     fun `should create new product`() {
         val productRequest = prepareProductRequest()
 
@@ -227,7 +246,7 @@ class ProductControllerTest @Autowired constructor(
         )
 
         assertEquals(403, updateResponse.statusCode.value())
-        assertEquals(NotAllowedAccessToResource(testUser1Id).message, updateResponse.body?.message)
+        assertEquals(NotAllowedAccessToResourceException(testUser1Id).message, updateResponse.body?.message)
 
     }
 
