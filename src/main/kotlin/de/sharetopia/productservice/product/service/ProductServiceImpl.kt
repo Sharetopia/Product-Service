@@ -62,7 +62,7 @@ class ProductServiceImpl : ProductService {
     if(updatedFieldsProductDTO.address != null){
       updatedFieldsProductDTO.location = GeoCoder.getCoordinatesForAddress(updatedFieldsProductDTO.address!!)
     }
-    return productRepository.save(storedProductModel.copy(
+    val updatedModel = storedProductModel.copy(
       title = updatedFieldsProductDTO.title ?: storedProductModel.title,
       description = updatedFieldsProductDTO.description ?: storedProductModel.description,
       price = if(updatedFieldsProductDTO.price!= BigDecimal.ZERO) updatedFieldsProductDTO.price else storedProductModel.price,
@@ -70,8 +70,9 @@ class ProductServiceImpl : ProductService {
       address = updatedFieldsProductDTO.address ?: storedProductModel.address,
       location = updatedFieldsProductDTO.location ?: storedProductModel.location,
       rentableDateRange = updatedFieldsProductDTO.rentableDateRange ?: storedProductModel.rentableDateRange,
-      rents = (updatedFieldsProductDTO.rents ?: storedProductModel.rents) as MutableList<Rent>?,
-    ))
+      rents = (updatedFieldsProductDTO.rents ?: storedProductModel.rents) as MutableList<Rent>?
+    )
+    return productRepository.save(updatedModel)
   }
 
   override fun findById(productId: String): Optional<ProductModel> {

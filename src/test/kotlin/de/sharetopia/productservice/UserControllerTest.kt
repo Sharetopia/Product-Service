@@ -113,6 +113,55 @@ class UserControllerTest @Autowired constructor(
     }
 
     @Test
+    fun `should update existing user`() {
+        val userToCreate = UserModel(testUser1Id, "www.test.de/12312498", name="Thomas Test", postalCode="12345")
+        userRepository.save(userToCreate)
+
+        val userRequest = UserDTO("www.test.de/12312498", name="Max Mustermann", postalCode="12345")
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessToken")
+        val entity = HttpEntity<UserDTO>(userRequest, headers)
+
+        val response = restTemplate.exchange(
+            getRootUrl()+"/user/${testUser1Id}",
+            HttpMethod.PUT,
+            entity,
+            UserView::class.java
+        )
+
+        assertEquals(200, response.statusCode.value())
+        assertNotNull(response.body)
+        assertEquals(testUser1Id, response.body?.id)
+        assertEquals(userRequest.profilePictureURL, response.body?.profilePictureURL)
+        assertEquals(userRequest.name, response.body?.name)
+    }
+
+    /*@Test
+    fun `should update single field of existing user`() {
+        val userToCreate = UserModel(testUser1Id, "www.test.de/12312498", name="Thomas Test", postalCode="12345")
+        userRepository.save(userToCreate)
+        val profilePictureURLOnlyUserDTO = UserDTO("www.neueURL.de/123")
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessToken")
+        val entity = HttpEntity<UserDTO>(profilePictureURLOnlyUserDTO,headers)
+
+        val patchResponse = restTemplate.exchange(
+            getRootUrl() + "/user/$testUser1Id",
+            HttpMethod.PATCH,
+            entity,
+            UserView::class.java
+        )
+
+        assertEquals(profilePictureURLOnlyUserDTO.profilePictureURL, patchResponse.body?.profilePictureURL)
+        assertNotNull(patchResponse.body)
+        assertEquals(testUser1Id, patchResponse.body?.id)
+        assertEquals(userToCreate.name, patchResponse.body?.name)
+        assertEquals(userToCreate.postalCode, patchResponse.body?.postalCode)
+    }*/
+
+    @Test
     fun `should return FORBIDDEN for trying to create user data as unauthorized user`() {
         val invalidAccessToken = "12345"
 

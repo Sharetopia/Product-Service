@@ -11,11 +11,8 @@
             <Pattern> %d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M - %msg%n </Pattern>
         </encoder>
     </appender>
-    <logger name="de.sharetopia.productservice" additivity="false" level="info">
-        <appender-ref ref="SAVE-TO-FILE" />
-        <appender-ref ref="STDOUT" />
-    </logger>
     <root level="INFO">
+        <appender-ref ref="SAVE-TO-FILE" />
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

@@ -251,7 +251,7 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `should delete existing task`() {
+    fun `should delete existing product`() {
         saveOneProduct(initialProductModel)
 
         val headers = HttpHeaders()
@@ -270,7 +270,7 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `should update single field of existing task`() {
+    fun `should update single field of existing product`() {
         saveOneProduct(initialProductModel)
         Thread.sleep(1000)
         val titleOnlyProductDTO = ProductDTO("patched")

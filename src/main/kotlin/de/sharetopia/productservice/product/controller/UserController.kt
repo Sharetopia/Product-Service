@@ -1,17 +1,19 @@
 package de.sharetopia.productservice.product.controller
 
-import de.sharetopia.productservice.product.dto.UserDTO
-import de.sharetopia.productservice.product.dto.UserProductsWithRentRequestsView
-import de.sharetopia.productservice.product.dto.UserSentRentRequestsWithProductsView
-import de.sharetopia.productservice.product.dto.UserView
+import de.sharetopia.productservice.product.dto.*
 import de.sharetopia.productservice.product.exception.UserNotFoundException
 import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
+import de.sharetopia.productservice.product.exception.ProductNotFoundException
+import de.sharetopia.productservice.product.model.ElasticProductModel
+import de.sharetopia.productservice.product.model.ProductModel
 import de.sharetopia.productservice.product.model.UserModel
 import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.UserService
 import de.sharetopia.productservice.product.util.ObjectMapperUtils
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -28,6 +30,8 @@ class UserController {
     @Autowired
     private lateinit var userService: UserService
 
+    private val log: Logger = LoggerFactory.getLogger(UserController::class.java)
+
     @Operation(summary = "Create user object for current authorized user")
     @PostMapping("/user")
     fun createUser(@RequestBody userDTO: UserDTO, principal: Principal): ResponseEntity<UserView> {
@@ -35,6 +39,39 @@ class UserController {
         var createdUser = userService.save(user, principal.name)
         return ResponseEntity.ok(ObjectMapperUtils.map(createdUser, UserView::class.java))
     }
+
+    @Operation(
+        summary = "Update or insert user",
+        description = "Updates/inserts user depending on if the given id already exists"
+    )
+    @PutMapping("/user/{id}")
+    fun updateOrInsertCurrentAuthorizedUser(
+        @PathVariable(value = "id") id: String,
+        @RequestBody userDTO: UserDTO,
+        principal: Principal
+    ): ResponseEntity<UserView> {
+        val authenticatedUserId = principal.name
+        val requestUserModel = ObjectMapperUtils.map(userDTO, UserModel::class.java)
+        val updatedUserModel = userService.updateOrInsert(authenticatedUserId, requestUserModel)
+        return ResponseEntity.ok(ObjectMapperUtils.map(updatedUserModel, UserView::class.java))
+    }
+
+    /*@Operation(
+        summary = "Updates product by id",
+        description = "Updates the provided fields of the product which belongs to the given id."
+    )
+    @PatchMapping("/user/{id}")
+    fun partialUpdate(
+        @PathVariable(value = "id") id: String,
+        @RequestBody updatedFieldsUserDTO: UserDTO,
+        principal: Principal
+    ): UserView {
+        val storedUserModel = userService.findById(id).orElseThrow {
+            UserNotFoundException(id)
+        }
+        val updatedUser = userService.partialUpdate(id, storedUserModel, updatedFieldsUserDTO)
+        return ObjectMapperUtils.map(updatedUser, UserView::class.java)
+    }*/
 
     @Operation(summary = "Gets user information about currently authorized user")
     @GetMapping("/user")
@@ -45,12 +82,9 @@ class UserController {
     }
 
     @Operation(summary = "Gets user by id")
-    @GetMapping("/user/{userId}")
-    fun getUser(@PathVariable(value = "id") userId: String, principal: Principal): ResponseEntity<Optional<UserModel>> {
-        if(principal.name!=userId){
-            throw NotAllowedAccessToResourceException(principal.name)
-        }
-        var user = userService.findById(userId)
+    @GetMapping("/user/{id}")
+    fun getUser(@PathVariable(value = "id") id: String, principal: Principal): ResponseEntity<Optional<UserModel>> {
+        var user = userService.findById(id)
         return ResponseEntity.ok(user)
     }
 
