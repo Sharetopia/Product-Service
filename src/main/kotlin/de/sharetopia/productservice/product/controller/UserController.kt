@@ -1,11 +1,10 @@
 package de.sharetopia.productservice.product.controller
 
-import de.sharetopia.productservice.product.dto.*
+import de.sharetopia.productservice.product.dto.UserDTO
+import de.sharetopia.productservice.product.dto.UserProductsWithRentRequestsView
+import de.sharetopia.productservice.product.dto.UserSentRentRequestsWithProductsView
+import de.sharetopia.productservice.product.dto.UserView
 import de.sharetopia.productservice.product.exception.UserNotFoundException
-import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
-import de.sharetopia.productservice.product.exception.ProductNotFoundException
-import de.sharetopia.productservice.product.model.ElasticProductModel
-import de.sharetopia.productservice.product.model.ProductModel
 import de.sharetopia.productservice.product.model.UserModel
 import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.UserService
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.security.Principal
-import java.util.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -27,6 +25,7 @@ import java.util.*
 class UserController {
     @Autowired
     private lateinit var productService: ProductService
+
     @Autowired
     private lateinit var userService: UserService
 
@@ -37,6 +36,7 @@ class UserController {
     fun createUser(@RequestBody userDTO: UserDTO, principal: Principal): ResponseEntity<UserView> {
         var user = ObjectMapperUtils.map(userDTO, UserModel::class.java)
         var createdUser = userService.save(user, principal.name)
+        log.info("Created user. {method=POST, endpoint=/user, requesterUserId=${principal.name}}")
         return ResponseEntity.ok(ObjectMapperUtils.map(createdUser, UserView::class.java))
     }
 
@@ -44,47 +44,57 @@ class UserController {
         summary = "Update or insert user",
         description = "Updates/inserts user depending on if the given id already exists"
     )
-    @PutMapping("/user/{id}")
+    @PutMapping("/user")
     fun updateOrInsertCurrentAuthorizedUser(
-        @PathVariable(value = "id") id: String,
         @RequestBody userDTO: UserDTO,
         principal: Principal
     ): ResponseEntity<UserView> {
         val authenticatedUserId = principal.name
         val requestUserModel = ObjectMapperUtils.map(userDTO, UserModel::class.java)
         val updatedUserModel = userService.updateOrInsert(authenticatedUserId, requestUserModel)
+        log.info("Updated/inserted user. {method=PUT, endpoint=/user, requesterUserId=${authenticatedUserId}}")
         return ResponseEntity.ok(ObjectMapperUtils.map(updatedUserModel, UserView::class.java))
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Updates product by id",
         description = "Updates the provided fields of the product which belongs to the given id."
     )
-    @PatchMapping("/user/{id}")
+    @PatchMapping("/user")
     fun partialUpdate(
-        @PathVariable(value = "id") id: String,
         @RequestBody updatedFieldsUserDTO: UserDTO,
         principal: Principal
     ): UserView {
-        val storedUserModel = userService.findById(id).orElseThrow {
-            UserNotFoundException(id)
+        val authenticatedUserId = principal.name
+        val storedUserModel = userService.findById(authenticatedUserId).orElseThrow {
+            log.error("Error fetching current authorized user. {error=UserNotFoundException, method=PATCH, endpoint=/user, requesterUserId=${authenticatedUserId}}")
+            UserNotFoundException(authenticatedUserId)
         }
-        val updatedUser = userService.partialUpdate(id, storedUserModel, updatedFieldsUserDTO)
+        val updatedUser = userService.partialUpdate(authenticatedUserId, storedUserModel, updatedFieldsUserDTO)
+        log.info("Partial update to current authorized user. {method=PATCH, endpoint=/user, requesterUserId=${principal.name}}")
         return ObjectMapperUtils.map(updatedUser, UserView::class.java)
-    }*/
+    }
 
     @Operation(summary = "Gets user information about currently authorized user")
     @GetMapping("/user")
     fun getCurrentAuthorizedUser(principal: Principal): ResponseEntity<UserView> {
-        var currentUserId = principal.name
-        var user = userService.findById(currentUserId).orElseThrow{ UserNotFoundException(currentUserId) }
+        var authenticatedUserId = principal.name
+        var user = userService.findById(authenticatedUserId).orElseThrow {
+            log.error("Error fetching current authorized user. {error=UserNotFoundException, method=GET, endpoint=/user, requesterUserId=${authenticatedUserId}}")
+            UserNotFoundException(authenticatedUserId)
+        }
+        log.info("Fetching current authorized user. {method=GET, endpoint=/user, requesterUserId=${authenticatedUserId}}")
         return ResponseEntity.ok(ObjectMapperUtils.map(user, UserView::class.java))
     }
 
     @Operation(summary = "Gets user by id")
     @GetMapping("/user/{id}")
-    fun getUser(@PathVariable(value = "id") id: String, principal: Principal): ResponseEntity<Optional<UserModel>> {
-        var user = userService.findById(id)
+    fun getUser(@PathVariable(value = "id") id: String, principal: Principal): ResponseEntity<UserModel> {
+        var user = userService.findById(id).orElseThrow {
+            log.error("Error fetching user by id. {error=UserNotFoundException, method=GET, endpoint=/user/{id}, requestedUserId=$id, requesterUserId=${principal.name}}")
+            UserNotFoundException(id)
+        }
+        log.info("Fetching user by id. {method=GET, endpoint=/user/{id}, requestedUserId=$id, requesterUserId=${principal.name}}")
         return ResponseEntity.ok(user)
     }
 
@@ -93,6 +103,7 @@ class UserController {
     fun getOfferedProductsOfUser(principal: Principal): ResponseEntity<MutableList<UserProductsWithRentRequestsView>> {
         var currentUserId = principal.name
         var productsAndRentRequestsForUser = productService.getProductsWithRentRequestsForUser(currentUserId)
+        log.info("Fetching offered Products offered by current authorized user. {method=GET, endpoint=/user/offeredProductsOverview, requesterUserId=${principal.name}}")
         return ResponseEntity.ok(productsAndRentRequestsForUser)
     }
 
@@ -101,6 +112,7 @@ class UserController {
     fun getRentRequestsOfUser(principal: Principal): ResponseEntity<MutableList<UserSentRentRequestsWithProductsView>> {
         var currentUserId = principal.name
         var rentRequestsWithProducts = productService.getRentRequestsWithProducts(currentUserId)
+        log.info("Fetching rent request for products offered by current authorized user. {method=GET, endpoint=/user/requestedProductsOverview, requesterUserId=${principal.name}}")
         return ResponseEntity.ok(rentRequestsWithProducts)
     }
 }

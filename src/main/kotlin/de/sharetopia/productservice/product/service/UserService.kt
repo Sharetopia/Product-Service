@@ -26,12 +26,11 @@ class UserService {
         storedUserModel.id = userId
         val updatedModel = storedUserModel.copy(
             profilePictureURL = updatedFieldsUserDTO.profilePictureURL ?: storedUserModel.profilePictureURL,
-            name = updatedFieldsUserDTO.name ?: storedUserModel.name,
-            /*forename = updatedFieldsUserDTO.forename ?: storedUserModel.forename,
+            forename = updatedFieldsUserDTO.forename ?: storedUserModel.forename,
             surname = updatedFieldsUserDTO.surname ?: storedUserModel.surname,
             address = updatedFieldsUserDTO.address ?: storedUserModel.address,
             city = updatedFieldsUserDTO.city ?: storedUserModel.city,
-            rating = updatedFieldsUserDTO.rating ?: storedUserModel.rating,*/
+            rating = updatedFieldsUserDTO.rating ?: storedUserModel.rating,
             postalCode = updatedFieldsUserDTO.postalCode ?: storedUserModel.postalCode
         )
         return userRepository.save(updatedModel)

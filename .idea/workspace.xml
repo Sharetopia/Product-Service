@@ -7,13 +7,15 @@
     <list default="true" id="7f43bb12-0405-4c94-ab34-f39658e42a8b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/application.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/ProductController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/ProductController.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/UserController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/UserController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/dto/UserDTO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/dto/UserDTO.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductServiceImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductServiceImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/RentRequestServiceImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/RentRequestServiceImpl.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/UserService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/UserService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/logback-spring.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/logback-spring.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/ProductControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/ProductControllerTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/UserControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/UserControllerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/util/GeoCoder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/util/GeoCoder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/ProductControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/integrationTests/ProductControllerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/ProductServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ProductServiceTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/UserControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/integrationTests/UserControllerTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,13 +65,19 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
   </component>
-  <component name="RunManager" selected="Gradle.UserControllerTest.should update single field of existing user">
-    <configuration name="ProductControllerTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RecentsManager">
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="de.sharetopia.productservice.unitTests" />
+      <recent name="de.sharetopia.productservice.integrationTests" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.ProductServiceTest">
+    <configuration name="ProductServiceTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductControllerTest&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -85,12 +93,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="UserControllerTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductServiceTest.should accept rent request and return updated rent request" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.UserControllerTest&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.should accept rent request and return updated rent request&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -106,12 +114,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="UserControllerTest.should update existing user" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductServiceTest.should add rent to product and save product and return it" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.UserControllerTest.should update existing user&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.should add rent to product and save product and return it&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -127,12 +135,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="UserControllerTest.should update single field of existing task" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductServiceTest.should get products with corresponding rent requests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.UserControllerTest.should update single field of existing task&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.should get products with corresponding rent requests&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -148,12 +156,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="UserControllerTest.should update single field of existing user" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductServiceTest.should return rent requests started by user" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.UserControllerTest.should update single field of existing user&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.ProductServiceTest.should return rent requests started by user&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -171,11 +179,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.UserControllerTest.should update single field of existing user" />
-        <item itemvalue="Gradle.UserControllerTest.should update single field of existing task" />
-        <item itemvalue="Gradle.UserControllerTest.should update existing user" />
-        <item itemvalue="Gradle.ProductControllerTest" />
-        <item itemvalue="Gradle.UserControllerTest" />
+        <item itemvalue="Gradle.ProductServiceTest" />
+        <item itemvalue="Gradle.ProductServiceTest.should return rent requests started by user" />
+        <item itemvalue="Gradle.ProductServiceTest.should get products with corresponding rent requests" />
+        <item itemvalue="Gradle.ProductServiceTest.should add rent to product and save product and return it" />
+        <item itemvalue="Gradle.ProductServiceTest.should accept rent request and return updated rent request" />
       </list>
     </recent_temporary>
   </component>

@@ -1,4 +1,4 @@
-package de.sharetopia.productservice
+package de.sharetopia.productservice.integrationTests
 
 import RestResponsePage
 import de.sharetopia.productservice.product.dto.*
@@ -78,7 +78,7 @@ class ProductControllerTest @Autowired constructor(
         elasticProductRepository.deleteAll()
         rentRequestRepository.deleteAll()
         userRepository.deleteAll()
-        Thread.sleep(1000) //TODO remove, currently there because geocoding api allows only max 1 request per second
+        Thread.sleep(1200) //TODO remove, currently there because geocoding api allows only max 1 request per second
     }
 
     @Test
@@ -397,7 +397,7 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `should return initial product by near search with city name and date range search`() {
+    fun `should return initial product by near search with city name AND date range search`() {
         saveOneProduct(initialProductModel)
 
         var secondProduct = initialProductModel.copy()
@@ -432,6 +432,36 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(defaultProductId,productViewList[0].id)
     }
 
+    @Test
+    fun `should return NOT_FOUND for near search with nonsense city name and valid date range search`() {
+        saveOneProduct(initialProductModel)
+
+        var secondProduct = initialProductModel.copy()
+        secondProduct.id = ObjectId.get().toString()
+        secondProduct.location = listOf(9.1938525,48.8848654)
+
+        val searchTerm = initialProductModel.title
+        val searchDistance = 20
+        val cityName = "dfghiufdghkjdfgs"
+        val startDate = "2021-12-12"
+        val endDate = "2021-12-20"
+
+        saveOneProduct(secondProduct)
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
+        val entity = HttpEntity<String>(headers)
+
+        val response = restTemplate.exchange(
+            getRootUrl() + "/products/findNearCity?term=$searchTerm&distance=$searchDistance&cityIdentifier=$cityName&startDate=$startDate&endDate=$endDate",
+            HttpMethod.GET,
+            entity,
+            ErrorResponse::class.java
+        )
+
+        assertEquals(404, response.statusCode.value())
+        assertEquals(LocationNotFoundException(cityName).message, response.body?.message)
+    }
 
     @Test
     fun `should accept rent request by adding rent request as rent to product and change rentRequest status to accepted`() {

@@ -1,4 +1,4 @@
-package de.sharetopia.productservice
+package de.sharetopia.productservice.unitTests
 
 import RestResponsePage
 import de.sharetopia.productservice.product.dto.ProductDTO
@@ -10,30 +10,32 @@ import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.ProductServiceImpl
 import de.sharetopia.productservice.product.service.RentRequestService
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
-import org.mockito.verification.After
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageRequest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
-import org.mockito.kotlin.any
 
 
 @ExtendWith(SpringExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductServiceTest {
+
     @Mock
     lateinit var productRepository: ProductRepository
 
@@ -50,7 +52,8 @@ class ProductServiceTest {
     var productService: ProductService = ProductServiceImpl()
 
     @BeforeEach
-    fun setup(){
+    fun setup() {
+        Thread.sleep(1200) // TODO remove before submission of code
         MockitoAnnotations.openMocks(this)
     }
 
@@ -151,28 +154,23 @@ class ProductServiceTest {
                 )
             )
 
-        `when`(productRepository.insert(productToCreate)).thenReturn(productToCreate)
+        whenever(productRepository.insert(productToCreate)).thenReturn(productToCreate)
 
         //test
         val productReturnedByService =
             productService.create(productToCreate, userId = "204e1304-26f0-47b5-b353-cee12f4c8d34")
 
+        verify(productRepository, times(1)).insert(productToCreate)
+        verify(elasticProductService, times(1)).save(any<ElasticProductModel>())
 
-
-        assertEquals(productToCreate.id, productReturnedByService.id)
         assertEquals(productToCreate.title, productReturnedByService.title)
         assertEquals(productToCreate.description, productReturnedByService.description)
-        assertEquals(productToCreate.ownerOfProductUserId, productReturnedByService.ownerOfProductUserId)
-        assertEquals(productToCreate.tags, productReturnedByService.tags)
-        assertEquals(productToCreate.price, productReturnedByService.price)
-        assertThat(productToCreate.rentableDateRange).usingRecursiveComparison()
-            .isEqualTo(productReturnedByService.rentableDateRange)
-        assertThat(productToCreate.rents).usingRecursiveComparison().isEqualTo(productReturnedByService.rents)
-        assertThat((9.100590 < productReturnedByService.location?.get(0)!!) && (productReturnedByService.location?.get(0)!! < 9.100592))
-        assertThat(
-            (48.7419327 < productReturnedByService.location?.get(0)!!) && (productReturnedByService.location?.get(
-                0
-            )!! < 48.7419329)
+        assertThat(productToCreate.address).usingRecursiveComparison().isEqualTo(productReturnedByService.address)
+        assertTrue((9.10 < productReturnedByService.location?.get(0)!!) && (productReturnedByService.location?.get(0)!! < 9.11))
+        assertTrue(
+            (48.74 < productReturnedByService.location?.get(1)!!) && (productReturnedByService.location?.get(
+                1
+            )!! < 48.75)
         )
     }
 
@@ -228,22 +226,23 @@ class ProductServiceTest {
             )
 
         `when`(productRepository.findById(anyString())).thenReturn(Optional.of(mockedProductInDb))
-        `when`(productRepository.findById(anyString())).thenReturn(Optional.of(mockedProductInDb))
-        `when`(productRepository.save(updateProduct)).thenReturn(updateProduct)
+        whenever(productRepository.save(any<ProductModel>())).doAnswer { it.arguments[0] as ProductModel }
 
         //test
         val productReturnedByService =
             productService.updateOrInsert("12345", updateProduct, userId = "204e1304-26f0-47b5-b353-cee12f4c8d34")
 
-        verify(elasticProductService, times(1)).save(any())
+        verify(productRepository, times(1)).save(any<ProductModel>())
+        verify(elasticProductService, times(1)).save(any<ElasticProductModel>())
+
         assertEquals(updateProduct.title, productReturnedByService.title)
         assertEquals(updateProduct.description, productReturnedByService.description)
         assertThat(updateProduct.address).usingRecursiveComparison().isEqualTo(productReturnedByService.address)
-        assertThat((9.430379 < productReturnedByService.location?.get(0)!!) && (productReturnedByService.location?.get(0)!! < 9.430381))
-        assertThat(
-            (48.923068 < productReturnedByService.location?.get(0)!!) && (productReturnedByService.location?.get(
-                0
-            )!! < 48.923070)
+        assertTrue((9.43 < productReturnedByService.location?.get(0)!!) && (productReturnedByService.location?.get(0)!! < 9.44))
+        assertTrue(
+            (48.97 < productReturnedByService.location?.get(1)!!) && (productReturnedByService.location?.get(
+                1
+            )!! < 48.98)
         )
     }
 
@@ -277,49 +276,30 @@ class ProductServiceTest {
         val updateFieldsProduct =
             ProductDTO(
                 title = "Rennrad Blau",
-                description = "Das ist mein blaues Rennrad"
+                description = "Das ist mein blaues Rennrad",
+                address = Address("Ludwigsburger Straße 11", "Backnang", "71522")
             )
 
-        val updatedModel = ProductModel(
-            id = "12345",
-            title = "Rennrad Blau",
-            description = "Das ist mein blaues Rennrad",
-            ownerOfProductUserId = "204e1304-26f0-47b5-b353-cee12f4c8d34",
-            tags = listOf("Fahrrad", "Mobilität"),
-            price = BigDecimal(12.99),
-            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
-            rentableDateRange = DateRangeDuration(
-                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            ),
-            rents = mutableListOf(
-                Rent(
-                    "3242354",
-                    DateRangeDuration(
-                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                    ),
-                    "2142423535"
-                )
-            )
-        )
-        `when`(productRepository.save(any(ProductModel::class.java))).thenReturn(updatedModel)
-
+        whenever(productRepository.save(any<ProductModel>())).doAnswer { it.arguments[0] as ProductModel }
 
         //test
         val productReturnedByService = productService.partialUpdate("12345", mockedProductInDb, updateFieldsProduct)
 
         verify(productRepository).save(argThat { productModel: ProductModel ->
             (productModel.id === "12345") &&
-            (productModel.title === updateFieldsProduct.title)
+                    (productModel.title === updateFieldsProduct.title) &&
+                    (productModel.description === updateFieldsProduct.description) &&
+                    (productModel.ownerOfProductUserId === mockedProductInDb.ownerOfProductUserId)
         })
 
-        verify(productRepository, times(1)).save(any(ProductModel::class.java))
+        assertTrue((9.43 < productReturnedByService.location?.get(0)!!) && (productReturnedByService.location?.get(0)!! < 9.44))
+        assertTrue(
+            (48.97 < productReturnedByService.location?.get(1)!!) && (productReturnedByService.location?.get(
+                1
+            )!! < 48.98)
+        )
 
-        assertEquals(updateFieldsProduct.title, productReturnedByService.title)
-        assertEquals(updateFieldsProduct.description, productReturnedByService.description)
-        assertEquals(mockedProductInDb.price, productReturnedByService.price)
-        assertEquals(mockedProductInDb.tags, productReturnedByService.tags)
+        verify(productRepository, times(1)).save(any<ProductModel>())
     }
 
     @Test
@@ -354,18 +334,6 @@ class ProductServiceTest {
         //test
         val productReturnedByService = productService.findById("12345").get()
         verify(productRepository, times(1)).findById(productInDb.id)
-
-        assertEquals(productInDb.id, productReturnedByService.id)
-        assertEquals(productInDb.title, productReturnedByService.title)
-        assertEquals(productInDb.description, productReturnedByService.description)
-        assertEquals(productInDb.ownerOfProductUserId, productReturnedByService.ownerOfProductUserId)
-        assertEquals(productInDb.tags, productReturnedByService.tags)
-        assertEquals(productInDb.price, productReturnedByService.price)
-        assertThat(productInDb.rentableDateRange).usingRecursiveComparison()
-            .isEqualTo(productReturnedByService.rentableDateRange)
-        assertThat(productInDb.rents).usingRecursiveComparison().isEqualTo(productReturnedByService.rents)
-        assertEquals(productInDb.location, productReturnedByService.location)
-
     }
 
     @Test
@@ -435,7 +403,6 @@ class ProductServiceTest {
             )
         )
 
-
         `when`(
             productRepository.findByIdIn(
                 listOf("12345", "5678"),
@@ -446,16 +413,308 @@ class ProductServiceTest {
         //test
         val productListReturnedByService = productService.findManyById(listOf("12345", "5678"), PageRequest.of(0, 10))
 
-        assertEquals(2, productListReturnedByService.size)
-        assertEquals("12345", productListReturnedByService.content[0].id)
-        assertEquals("5678", productListReturnedByService.content[1].id)
-        verify(productRepository, times(1)).findByIdIn(anyList(), any())
+        verify(productRepository, times(1)).findByIdIn(listOf("12345", "5678"), PageRequest.of(0, 10))
     }
 
     @Test
     fun `should accept rent request and return updated rent request`() {
+        val rentRequestInDBMocked = RentRequestModel(
+            id = "2222",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "3333"
+        )
 
+        val rentRequestInDBMockedAfterAccept = RentRequestModel(
+            id = "2222",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "3333",
+            status = "accepted"
+        )
+
+        val productInDb = ProductModel(
+            id = "3333",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "5678",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+
+        whenever(rentRequestService.findById("2222")).thenReturn(Optional.of(rentRequestInDBMocked))
+        whenever(productRepository.findById("3333")).thenReturn(Optional.of(productInDb))
+        whenever(productRepository.save(any<ProductModel>())).doAnswer { it.arguments[0] as ProductModel }
+        whenever(rentRequestService.updateStatus("accepted", rentRequestInDBMocked)).thenReturn(
+            rentRequestInDBMockedAfterAccept
+        )
+
+        //test
+        val rentRequestReturnedByService = productService.acceptOrRejectRentRequest("3333", "2222", true, "5678")
+
+        verify(rentRequestService, times(1)).findById("2222")
+        verify(productRepository, times(1)).findById("3333")
+        verify(elasticProductService, times(1)).save(any<ElasticProductModel>())
+        verify(rentRequestService, times(1)).updateStatus("accepted", rentRequestInDBMocked)
     }
 
+    @Test
+    fun `should get products with corresponding rent requests`() {
+        val rentRequest0ForProduct0 = RentRequestModel(
+            id = "1111",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "0"
+        )
+
+        val rentRequest1ForProduct0 = RentRequestModel(
+            id = "2222",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "0"
+        )
+
+        val product0 = ProductModel(
+            id = "0",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "1337",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+
+        val rentRequest0ForProduct1 = RentRequestModel(
+            id = "3333",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "1"
+        )
+
+        val product1 = ProductModel(
+            id = "1",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "1337",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+
+        whenever(productRepository.findByOwnerOfProductUserId("1337")).thenReturn(listOf(product0, product1))
+        whenever(rentRequestRepository.findByRentRequestReceiverUserId("1337")).thenReturn(
+            listOf(
+                rentRequest0ForProduct0,
+                rentRequest1ForProduct0,
+                rentRequest0ForProduct1
+            )
+        )
+        //test
+        val productsWithRentRequests = productService.getProductsWithRentRequestsForUser("1337")
+        assertEquals(2, productsWithRentRequests.size)
+        assertEquals(2, productsWithRentRequests[0].rentRequests.size)
+        assertEquals(1, productsWithRentRequests[1].rentRequests.size)
+    }
+
+    @Test
+    fun `should add rent to product and save product and return it`() {
+        val rentRequestToBeAddedAsRent = RentRequestModel(
+            id = "2222",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "3333"
+        )
+
+        val productToAddRentTo = ProductModel(
+            id = "3333",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "5678",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+
+        whenever(productRepository.save(any<ProductModel>())).doAnswer { it.arguments[0] as ProductModel }
+
+        //test
+        val productReturnedByService = productService.addRentToProduct(productToAddRentTo, rentRequestToBeAddedAsRent)
+
+        assertNotNull(productReturnedByService.rents?.find { it.rentId == rentRequestToBeAddedAsRent.id })
+        assertEquals(
+            productReturnedByService.rents?.find { it.rentId == rentRequestToBeAddedAsRent.id }?.rentDuration?.fromDate,
+            LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        )
+        assertEquals(
+            productReturnedByService.rents?.find { it.rentId == rentRequestToBeAddedAsRent.id }?.rentDuration?.toDate,
+            LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        )
+    }
+
+    @Test
+    fun `should return rent requests started by user`() {
+        val rentRequestByUser0 = RentRequestModel(
+            id = "1111",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "0"
+        )
+
+        val requestedProduct0 = ProductModel(
+            id = "0",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "5678",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+
+        val rentRequestByUser1 = RentRequestModel(
+            id = "2222",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "1"
+        )
+
+        val requestedProduct1 = ProductModel(
+            id = "1",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "5678",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+
+        whenever(rentRequestRepository.findByRequesterUserId("1234")).thenReturn(
+            listOf(
+                rentRequestByUser0,
+                rentRequestByUser1
+            )
+        )
+        whenever(productRepository.findByIdIn(listOf("0", "1"))).thenReturn(
+            listOf(
+                requestedProduct0,
+                requestedProduct1
+            )
+        )
+
+        //test
+        val productReturnedByService = productService.getRentRequestsWithProducts("1234")
+
+        assertEquals(2, productReturnedByService.size)
+        assertEquals("0", productReturnedByService[0].product.id)
+        assertEquals("1", productReturnedByService[1].product.id)
+        assertEquals("1111", productReturnedByService[0].rentRequest.id)
+        assertEquals("2222", productReturnedByService[1].rentRequest.id)
+    }
 
 }
