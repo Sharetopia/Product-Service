@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   annotations:
     kompose.cmd: kompose convert
-    kompose.version: 1.26.0 (HEAD)
+    kompose.version: 1.26.1 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: sharetopia-elasticsearch
@@ -18,7 +18,7 @@ spec:
     metadata:
       annotations:
         kompose.cmd: kompose convert
-        kompose.version: 1.26.0 (HEAD)
+        kompose.version: 1.26.1 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/sharetopia: "true"
@@ -26,6 +26,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: ES_JAVA_OPTS
+              value: -Xms256m -Xmx256m
             - name: discovery.type
               value: single-node
             - name: xpack.security.enabled

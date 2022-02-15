@@ -3,7 +3,7 @@ kind: Service
 metadata:
   annotations:
     kompose.cmd: kompose convert
-    kompose.version: 1.26.0 (HEAD)
+    kompose.version: 1.26.1 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: sharetopia-mongo
@@ -11,9 +11,6 @@ metadata:
 spec:
   ports:
     - name: "27017"
-      port: 27017
-      targetPort: 27017
-    - name: 27017-tcp
       port: 27017
       targetPort: 27017
   selector:

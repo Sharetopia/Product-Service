@@ -3,7 +3,7 @@ kind: Service
 metadata:
   annotations:
     kompose.cmd: kompose convert
-    kompose.version: 1.26.0 (HEAD)
+    kompose.version: 1.26.1 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: sharetopia-elasticsearch
@@ -14,12 +14,6 @@ spec:
       port: 9200
       targetPort: 9200
     - name: "9300"
-      port: 9300
-      targetPort: 9300
-    - name: 9200-tcp
-      port: 9200
-      targetPort: 9200
-    - name: 9300-tcp
       port: 9300
       targetPort: 9300
   selector:
