@@ -29,7 +29,7 @@ class RentRequestServiceImpl : RentRequestService {
             ProductNotFoundException(rentRequest.requestedProductId!!)
         }
         rentRequest.rentRequestReceiverUserId = requestedProduct.ownerOfProductUserId
-        return rentRequestRepository.insert(rentRequest)
+        return rentRequestRepository.save(rentRequest)
     }
 
     override fun updateStatus(newStatus: String, rentRequest: RentRequestModel): RentRequestModel {

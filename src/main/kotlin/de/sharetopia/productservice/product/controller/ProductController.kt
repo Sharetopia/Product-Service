@@ -14,7 +14,6 @@ import de.sharetopia.productservice.product.model.RentRequestModel
 import de.sharetopia.productservice.product.service.ElasticProductService
 import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.RentRequestService
-import de.sharetopia.productservice.product.service.UserService
 import de.sharetopia.productservice.product.util.ObjectMapperUtils
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -48,12 +47,12 @@ class ProductController {
 
     @Autowired
     private lateinit var productService: ProductService
+
     @Autowired
     private lateinit var elasticProductService: ElasticProductService
+
     @Autowired
     private lateinit var rentRequestService: RentRequestService
-    @Autowired
-    private lateinit var userService: UserService
 
     @Operation(summary = "Get all products", description = "Get all currently stored products")
     @ApiResponses(
@@ -70,7 +69,7 @@ class ProductController {
         ]
     )
     @GetMapping("/products")
-    fun getAll(principal: Principal): List<ProductView> {
+    fun getAllProducts(principal: Principal): List<ProductView> {
         log.info("Fetched all products. {method=GET, endpoint=/products, requesterUserId=${principal.name}}")
         return ObjectMapperUtils.mapAll(productService.findAll(), ProductView::class.java)
     }
@@ -87,7 +86,7 @@ class ProductController {
         ]
     )
     @PostMapping("/products")
-    fun create(@RequestBody productDTO: ProductDTO, principal: Principal): ResponseEntity<ProductView> {
+    fun createProduct(@RequestBody productDTO: ProductDTO, principal: Principal): ResponseEntity<ProductView> {
         val authenticatedUserId = principal.name
         val requestProductModel = ObjectMapperUtils.map(productDTO, ProductModel::class.java)
         val createdProductModel = productService.create(requestProductModel, authenticatedUserId)
@@ -110,7 +109,7 @@ class ProductController {
         ]
     )
     @PutMapping("/products/{id}")
-    fun updateOrInsert(
+    fun updateOrInsertProduct(
         @PathVariable(value = "id") productId: String,
         @RequestBody productDTO: ProductDTO,
         principal: Principal
@@ -138,7 +137,10 @@ class ProductController {
         ]
     )
     @GetMapping("/products/{id}")
-    fun getById(@PathVariable(value = "id") productId: String, principal: Principal): ResponseEntity<ProductView> {
+    fun getProductById(
+        @PathVariable(value = "id") productId: String,
+        principal: Principal
+    ): ResponseEntity<ProductView> {
         val requestedProduct = productService.findById(productId).orElseThrow {
             log.error("Error fetching product by id. {error=ProductNotFoundException, method=GET, endpoint=/products/{id}, productId=$productId, requesterUserId=${principal.name}}")
             ProductNotFoundException(productId)
@@ -159,7 +161,7 @@ class ProductController {
         ]
     )
     @GetMapping("/products/batch/{ids}")
-    fun getByMultipleIds(
+    fun getProductsByMultipleIds(
         @PathVariable(value = "ids") productIdList: List<String>, @RequestParam(defaultValue = "0") pageNo: Int,
         @RequestParam(defaultValue = "10") pageSize: Int, principal: Principal
     ): Page<ProductView> {
@@ -259,7 +261,7 @@ class ProductController {
         ]
     )
     @DeleteMapping("/products/{id}")
-    fun deleteById(@PathVariable(value = "id") productId: String, principal: Principal): ResponseEntity<Any> {
+    fun deleteProductById(@PathVariable(value = "id") productId: String, principal: Principal): ResponseEntity<Any> {
         val productToBeDeleted = productService.findById(productId).orElseThrow {
             log.error("Error fetching product by id. {error=ProductNotFoundException, method=DELETE, endpoint=/products/{id}, productId=$productId, requesterUserId=${principal.name}}")
             ProductNotFoundException(productId)
@@ -360,7 +362,6 @@ class ProductController {
             throw NotAllowedAccessToResourceException(principal.name)
         }
         rentRequestService.deleteById(rentRequestId)
-
         log.info("Delete rent request by id. {method=POST, endpoint=/rentRequest, requesterUserId=${principal.name}}")
         return ResponseEntity<Any>(HttpStatus.OK)
     }
