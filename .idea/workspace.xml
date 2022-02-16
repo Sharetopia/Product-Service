@@ -7,9 +7,9 @@
     <list default="true" id="7f43bb12-0405-4c94-ab34-f39658e42a8b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/application.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/ProductController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/ProductController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductServiceImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/ProductServiceImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/RentRequestServiceImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/service/RentRequestServiceImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ProductServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ProductServiceTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/RentRequestServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/RentRequestServiceTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/UserServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/UserServiceTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,13 +65,13 @@
       <recent name="de.sharetopia.productservice.integrationTests" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.RentRequestServiceTest.should save and return rent request">
-    <configuration name="RentRequestServiceTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.RentRequestServiceTest.should throw ProductNotFoundException when trying to create rent request for non-existing product">
+    <configuration name="ProductServiceTest.should throw NotAllowedAccessToResourceException trying to update product of other user" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.RentRequestServiceTest&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.ProductServiceTest.should throw NotAllowedAccessToResourceException trying to update product of other user&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -87,12 +87,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="RentRequestServiceTest.should find all rent requests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductServiceTest.should throw NotAllowedAccessToResourceException when trying to accept rent request of other product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.RentRequestServiceTest.should find all rent requests&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.ProductServiceTest.should throw NotAllowedAccessToResourceException when trying to accept rent request of other product&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -108,12 +108,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="RentRequestServiceTest.should find rent request by id" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductServiceTest.should throw ProductNotFoundException when trying to accept reject non-existing rent request" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.RentRequestServiceTest.should find rent request by id&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.ProductServiceTest.should throw ProductNotFoundException when trying to accept reject non-existing rent request&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -129,12 +129,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="RentRequestServiceTest.should save and return rent request" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductServiceTest.should throw ProductNotFoundException when trying to accept reject rent request for non existing product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.RentRequestServiceTest.should save and return rent request&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.ProductServiceTest.should throw ProductNotFoundException when trying to accept reject rent request for non existing product&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -150,12 +150,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="UserServiceTest.should save and return user" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="RentRequestServiceTest.should throw ProductNotFoundException when trying to create rent request for non-existing product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.UserServiceTest.should save and return user&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.RentRequestServiceTest.should throw ProductNotFoundException when trying to create rent request for non-existing product&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -173,11 +173,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.RentRequestServiceTest.should save and return rent request" />
-        <item itemvalue="Gradle.RentRequestServiceTest.should find all rent requests" />
-        <item itemvalue="Gradle.RentRequestServiceTest" />
-        <item itemvalue="Gradle.RentRequestServiceTest.should find rent request by id" />
-        <item itemvalue="Gradle.UserServiceTest.should save and return user" />
+        <item itemvalue="Gradle.RentRequestServiceTest.should throw ProductNotFoundException when trying to create rent request for non-existing product" />
+        <item itemvalue="Gradle.ProductServiceTest.should throw NotAllowedAccessToResourceException when trying to accept rent request of other product" />
+        <item itemvalue="Gradle.ProductServiceTest.should throw ProductNotFoundException when trying to accept reject rent request for non existing product" />
+        <item itemvalue="Gradle.ProductServiceTest.should throw ProductNotFoundException when trying to accept reject non-existing rent request" />
+        <item itemvalue="Gradle.ProductServiceTest.should throw NotAllowedAccessToResourceException trying to update product of other user" />
       </list>
     </recent_temporary>
   </component>

@@ -2,6 +2,9 @@ package de.sharetopia.productservice.unitTests
 
 import RestResponsePage
 import de.sharetopia.productservice.product.dto.ProductDTO
+import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
+import de.sharetopia.productservice.product.exception.ProductNotFoundException
+import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
@@ -247,6 +250,63 @@ class ProductServiceTest {
     }
 
     @Test
+    fun `should throw NotAllowedAccessToResourceException trying to update product of other user`() {
+        val mockedProductInDb =
+            ProductModel(
+                id = "12345",
+                title = "Rennrad Rot",
+                description = "Das ist mein rotes Rennrad",
+                ownerOfProductUserId = "204e1304-26f0-47b5-b353-cee12f4c8d34",
+                tags = listOf("Fahrrad", "Mobilität"),
+                price = BigDecimal(12.99),
+                address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+                rentableDateRange = DateRangeDuration(
+                    LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                ),
+                rents = mutableListOf(
+                    Rent(
+                        "3242354",
+                        DateRangeDuration(
+                            LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                            LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        ),
+                        "2142423535"
+                    )
+                )
+            )
+
+        val updateProduct =
+            ProductModel(
+                title = "Rennrad Blau",
+                description = "Das ist mein blaues Rennrad",
+                ownerOfProductUserId = "204e1304-26f0-47b5-b353-cee12f4c8d34",
+                tags = listOf("Fahrrad", "Mobilität"),
+                price = BigDecimal(12.99),
+                address = Address("Ludwigsburger Straße 11", "Backnang", "71522"),
+                rentableDateRange = DateRangeDuration(
+                    LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                ),
+                rents = mutableListOf(
+                    Rent(
+                        "3242354",
+                        DateRangeDuration(
+                            LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                            LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        ),
+                        "2142423535"
+                    )
+                )
+            )
+
+        `when`(productRepository.findById(anyString())).thenReturn(Optional.of(mockedProductInDb))
+        whenever(productRepository.save(any<ProductModel>())).doAnswer { it.arguments[0] as ProductModel }
+
+        assertThrows(NotAllowedAccessToResourceException::class.java) { productService.updateOrInsert("12345", updateProduct, userId = "1234") }
+    }
+
+    @Test
     fun `should return updated product after partial update`() {
         val mockedProductInDb =
             ProductModel(
@@ -476,6 +536,131 @@ class ProductServiceTest {
         verify(productRepository, times(1)).findById("3333")
         verify(elasticProductService, times(1)).save(any<ElasticProductModel>())
         verify(rentRequestService, times(1)).updateStatus("accepted", rentRequestInDBMocked)
+    }
+
+    @Test
+    fun `should throw RentRequestNotFoundException when trying to accept reject non-existing rent request`() {
+        val productInDb = ProductModel(
+            id = "3333",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "5678",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+
+        assertThrows(RentRequestNotFoundException::class.java) { productService.acceptOrRejectRentRequest("12345", "124223532523", true, "1234") }
+    }
+
+    @Test
+    fun `should throw ProductNotFoundException when trying to accept reject rent request for non existing product`() {
+        val rentRequestInDBMocked = RentRequestModel(
+            id = "2222",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "3333"
+        )
+
+        val productInDb = ProductModel(
+            id = "3333",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "5678",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+        whenever(rentRequestService.findById("2222")).thenReturn(Optional.of(rentRequestInDBMocked))
+        assertThrows(ProductNotFoundException::class.java) { productService.acceptOrRejectRentRequest("235235456345", "2222", true, "1234") }
+    }
+
+    @Test
+    fun `should throw NotAllowedAccessToResourceException when trying to accept rent request of other product`() {
+        val rentRequestInDBMocked = RentRequestModel(
+            id = "2222",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "3333"
+        )
+
+        val rentRequestInDBMockedAfterAccept = RentRequestModel(
+            id = "2222",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "3333",
+            status = "accepted"
+        )
+
+        val productInDb = ProductModel(
+            id = "3333",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "4567",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            location = listOf(9.1938525, 48.8848654),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
+                )
+            )
+        )
+
+        whenever(rentRequestService.findById("2222")).thenReturn(Optional.of(rentRequestInDBMocked))
+        whenever(productRepository.findById("3333")).thenReturn(Optional.of(productInDb))
+        whenever(productRepository.save(any<ProductModel>())).doAnswer { it.arguments[0] as ProductModel }
+        whenever(rentRequestService.updateStatus("accepted", rentRequestInDBMocked)).thenReturn(
+            rentRequestInDBMockedAfterAccept
+        )
+
+        assertThrows(NotAllowedAccessToResourceException::class.java) { productService.acceptOrRejectRentRequest("3333", "2222", true, "1234") }
     }
 
     @Test
