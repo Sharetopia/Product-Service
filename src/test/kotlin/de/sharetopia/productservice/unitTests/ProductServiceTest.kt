@@ -56,7 +56,6 @@ class ProductServiceTest {
 
     @BeforeEach
     fun setup() {
-        Thread.sleep(1200) // TODO remove before submission of code
         MockitoAnnotations.openMocks(this)
     }
 

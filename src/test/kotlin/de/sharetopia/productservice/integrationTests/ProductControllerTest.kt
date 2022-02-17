@@ -78,13 +78,11 @@ class ProductControllerTest @Autowired constructor(
         elasticProductRepository.deleteAll()
         rentRequestRepository.deleteAll()
         userRepository.deleteAll()
-        Thread.sleep(1200) //TODO remove, currently there because geocoding api allows only max 1 request per second
     }
 
     @Test
     fun `should return all products`() {
         saveOneProduct(initialProductModel)
-        Thread.sleep(1000)
         var secondProduct = initialProductModel.copy()
         secondProduct.id = ObjectId.get().toString()
         saveOneProduct(secondProduct)
@@ -150,19 +148,15 @@ class ProductControllerTest @Autowired constructor(
     @Test
     fun `should create new product`() {
         val productRequest = prepareProductRequest()
-
         val headers = HttpHeaders()
         headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<ProductDTO>(productRequest, headers)
-
         val response = restTemplate.exchange(
             getRootUrl()+"/products",
             HttpMethod.POST,
             entity,
             ProductView::class.java
         )
-
-
         assertEquals(200, response.statusCode.value())
         assertNotNull(response.body)
         assertNotNull(response.body?.id)
@@ -171,8 +165,10 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(productRequest.tags, response.body?.tags)
         assertEquals(productRequest.price, response.body?.price)
         assertEquals(productRequest.address, response.body?.address)
-        assertThat(productRequest.rentableDateRange).usingRecursiveComparison().isEqualTo(response.body?.rentableDateRange)
-        assertThat(productRequest.rents).usingRecursiveComparison().isEqualTo(response.body?.rents)
+        assertThat(productRequest.rentableDateRange)
+        .usingRecursiveComparison().isEqualTo(response.body?.rentableDateRange)
+        assertThat(productRequest.rents)
+        .usingRecursiveComparison().isEqualTo(response.body?.rents)
     }
 
     @Test
@@ -199,7 +195,6 @@ class ProductControllerTest @Autowired constructor(
     @Test
     fun `should update existing product`() {
         saveOneProduct(initialProductModel)
-        Thread.sleep(1000)
         val productRequest = prepareProductRequest()
 
         val headers = HttpHeaders()
@@ -229,8 +224,6 @@ class ProductControllerTest @Autowired constructor(
         var productOfOtherUser = initialProductModel.copy()
         productOfOtherUser.ownerOfProductUserId = "12345"
         saveOneProduct(productOfOtherUser)
-
-        Thread.sleep(1000)
 
         val productRequest = prepareProductRequest()
 
@@ -272,7 +265,6 @@ class ProductControllerTest @Autowired constructor(
     @Test
     fun `should update single field of existing product`() {
         saveOneProduct(initialProductModel)
-        Thread.sleep(1000)
         val titleOnlyProductDTO = ProductDTO("patched")
 
         val headers = HttpHeaders()
@@ -329,7 +321,6 @@ class ProductControllerTest @Autowired constructor(
     @Test
     fun `should return initial product by near search with postal code`() {
         saveOneProduct(initialProductModel)
-        Thread.sleep(1000)
 
         var secondProduct = initialProductModel.copy()
         secondProduct.id = ObjectId.get().toString()
@@ -340,7 +331,6 @@ class ProductControllerTest @Autowired constructor(
         val postalCode = 70569
 
         saveOneProduct(secondProduct)
-        Thread.sleep(1000)
 
         val responseType: ParameterizedTypeReference<RestResponsePage<ProductView>> =
             object : ParameterizedTypeReference<RestResponsePage<ProductView>>() {}

@@ -42,12 +42,9 @@ class UserServiceTest {
             rating = "5",
             postalCode = "404"
         )
-
         whenever(userRepository.save(any<UserModel>())).thenReturn(userToCreate)
-
         //test
         userService.save(userToCreate, "1234")
-
         verify(userRepository, times(1)).save(argThat {
             (id === "1234") &&
             (profilePictureURL === userToCreate.profilePictureURL) &&
