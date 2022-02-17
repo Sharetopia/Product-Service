@@ -93,10 +93,6 @@ class ProductServiceApplication : CommandLineRunner {
 
     elasticProductRepository.save(ObjectMapperUtils.map(savedModel, ElasticProductModel::class.java))
     elasticProductRepository.save(ObjectMapperUtils.map(savedModel1, ElasticProductModel::class.java))
-
-    //val products =  productRepository.findByLocationNear(GeoJsonPoint(9.430380, 48.923069), Distance(5.0, Metrics.KILOMETERS))
-
-    //print(products)
   }
 
     @Bean

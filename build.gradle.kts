@@ -34,6 +34,7 @@ dependencies {
 	implementation("com.amazonaws:aws-java-sdk-cognitoidp:1.12.145")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
+	testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 }
 
 tasks.withType<KotlinCompile> {

@@ -3,6 +3,8 @@ package de.sharetopia.productservice.product.util
 import de.sharetopia.productservice.product.exception.LocationNotFoundException
 import de.sharetopia.productservice.product.model.Address
 import de.sharetopia.productservice.product.model.geoCodeApiResponse.GeoCodedAddress
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -15,6 +17,8 @@ object GeoCoder {
     private val restTemplate = RestTemplate()
     private var headers = HttpHeaders()
     private val entity: HttpEntity<String>
+
+    private val log: Logger = LoggerFactory.getLogger(GeoCoder::class.java)
 
     init{
         headers.accept = listOf(MediaType.APPLICATION_JSON)
@@ -36,6 +40,7 @@ object GeoCoder {
         return if (geoResult != null && geoResult.features.isNotEmpty()) {
             geoResult.features[0].geometry.coordinates
         } else{
+            log.error("Error geocoding address to coordinates. {error=LocationNotFoundException}")
             throw LocationNotFoundException(address.toString())
         }
 
@@ -54,6 +59,7 @@ object GeoCoder {
         return if (geoResult != null && geoResult.features.isNotEmpty()) {
             geoResult.features[0].geometry.coordinates
         } else{
+            log.error("Error geocoding city identifier to coordinates. {error=LocationNotFoundException}")
             throw LocationNotFoundException(nameOrZip)
         }
 

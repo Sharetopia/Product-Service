@@ -1,24 +1,15 @@
-package de.sharetopia.productservice
+package de.sharetopia.productservice.integrationTests
 
 import RestResponsePage
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.AnonymousAWSCredentials
-import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider
-import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder
-import com.amazonaws.services.cognitoidp.model.AuthFlowType
-import com.amazonaws.services.cognitoidp.model.AuthenticationResultType
-import com.amazonaws.services.cognitoidp.model.InitiateAuthRequest
-import com.amazonaws.services.elasticache.model.User
 import de.sharetopia.productservice.product.dto.*
-import de.sharetopia.productservice.product.exception.ProductNotFoundException
-import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
+import de.sharetopia.productservice.product.exception.*
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ElasticProductRepository
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
 import de.sharetopia.productservice.product.repository.UserRepository
-import de.sharetopia.productservice.product.util.GeoCoder
 import de.sharetopia.productservice.product.util.ObjectMapperUtils
+import de.sharetopia.productservice.testUtil.AuthorizationUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.*
@@ -48,8 +39,11 @@ class ProductControllerTest @Autowired constructor(
     private val userRepository: UserRepository,
     private val restTemplate: TestRestTemplate
 ){
+
+    private val authorizationUtils = AuthorizationUtils()
     private val defaultProductId = ObjectId.get().toString()
     private val testUser1Id = "204e1304-26f0-47b5-b353-cee12f4c8d34"
+    private val accessTokenTestUser1 = authorizationUtils.login("tset123456@web.de","ackeracker123")
 
     private val initialProductModel: ProductModel = ProductModel(
         defaultProductId,
@@ -78,48 +72,13 @@ class ProductControllerTest @Autowired constructor(
     @LocalServerPort
     protected var port: Int = 0
 
-    val testRegion = "eu-central-1"
-    val testUserPoolId = "eu-central-1_sxdpyi2QD"
-    val testClientId = "3vgfb9n80chgbah3lvqiq7l9f0"
-
-    fun getAmazonCognitoIdentityClient(): AWSCognitoIdentityProvider? {
-        val awsCreds = AnonymousAWSCredentials()
-        val provider = AWSCognitoIdentityProviderClientBuilder
-            .standard()
-            .withCredentials(AWSStaticCredentialsProvider(awsCreds))
-            .withRegion(testRegion)
-            .build()
-        return provider
-    }
-
-    fun login(username: String, password: String): String {
-        var authenticationResult: AuthenticationResultType?
-        val cognitoClient = getAmazonCognitoIdentityClient()
-
-        val authParams: MutableMap<String, String> = HashMap()
-        authParams["USERNAME"] = username
-        authParams["PASSWORD"] = password
-
-        val authRequest = InitiateAuthRequest()
-        authRequest.withAuthFlow(AuthFlowType.USER_PASSWORD_AUTH)
-            .withClientId(testClientId)
-            .withAuthParameters(authParams)
-
-        val result = cognitoClient!!.initiateAuth(authRequest)
-
-
-        authenticationResult = result.authenticationResult
-        cognitoClient.shutdown()
-        return authenticationResult.accessToken
-    }
-
     @BeforeEach
     fun setUp() {
         productRepository.deleteAll()
         elasticProductRepository.deleteAll()
         rentRequestRepository.deleteAll()
         userRepository.deleteAll()
-        Thread.sleep(1000) //TODO remove, currently there because geocoding api allows only max 1 request per second
+        Thread.sleep(1200) //TODO remove, currently there because geocoding api allows only max 1 request per second
     }
 
     @Test
@@ -134,7 +93,7 @@ class ProductControllerTest @Autowired constructor(
             object : ParameterizedTypeReference<List<ProductView>>() {}
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
 
         val response = restTemplate.exchange(
@@ -154,7 +113,7 @@ class ProductControllerTest @Autowired constructor(
         saveOneProduct(initialProductModel)
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
 
         val response = restTemplate.exchange(
@@ -170,11 +129,30 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
+    fun `should return NOT FOUND when trying to access non existing product`() {
+        saveOneProduct(initialProductModel)
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
+        val entity = HttpEntity<String>(headers)
+
+        val response = restTemplate.exchange(
+            getRootUrl() + "/products/9999",
+            HttpMethod.GET,
+            entity,
+            ErrorResponse::class.java
+        )
+
+        assertEquals(404, response.statusCode.value())
+        assertEquals(ProductNotFoundException("9999").message, response.body?.message)
+    }
+
+    @Test
     fun `should create new product`() {
         val productRequest = prepareProductRequest()
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<ProductDTO>(productRequest, headers)
 
         val response = restTemplate.exchange(
@@ -197,6 +175,26 @@ class ProductControllerTest @Autowired constructor(
         assertThat(productRequest.rents).usingRecursiveComparison().isEqualTo(response.body?.rents)
     }
 
+    @Test
+    fun `should return NOT FOUND for trying to create product with invalid address`() {
+        var productDTOwithInvalidAddress = prepareProductRequest()
+        productDTOwithInvalidAddress.address = Address("","","")
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
+        val entity = HttpEntity<ProductDTO>(productDTOwithInvalidAddress, headers)
+
+        val response = restTemplate.exchange(
+            getRootUrl()+"/products",
+            HttpMethod.POST,
+            entity,
+            ErrorResponse::class.java
+        )
+
+        assertEquals(404, response.statusCode.value())
+        assertEquals(LocationNotFoundException(Address("", "", "").toString()).message, response.body?.message)
+
+    }
 
     @Test
     fun `should update existing product`() {
@@ -205,7 +203,7 @@ class ProductControllerTest @Autowired constructor(
         val productRequest = prepareProductRequest()
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<ProductDTO>(productRequest, headers)
 
         val updateResponse = restTemplate.exchange(
@@ -227,11 +225,37 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `should delete existing task`() {
+    fun `should return FORBIDDEN when trying to update product created by other user`() {
+        var productOfOtherUser = initialProductModel.copy()
+        productOfOtherUser.ownerOfProductUserId = "12345"
+        saveOneProduct(productOfOtherUser)
+
+        Thread.sleep(1000)
+
+        val productRequest = prepareProductRequest()
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
+        val entity = HttpEntity<ProductDTO>(productRequest, headers)
+
+        val updateResponse = restTemplate.exchange(
+            getRootUrl() + "/products/$defaultProductId",
+            HttpMethod.PUT,
+            entity,
+            ErrorResponse::class.java
+        )
+
+        assertEquals(403, updateResponse.statusCode.value())
+        assertEquals(NotAllowedAccessToResourceException(testUser1Id).message, updateResponse.body?.message)
+
+    }
+
+    @Test
+    fun `should delete existing product`() {
         saveOneProduct(initialProductModel)
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
 
         val deleteResponse = restTemplate.exchange(
@@ -246,13 +270,13 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `should update single field of existing task`() {
+    fun `should update single field of existing product`() {
         saveOneProduct(initialProductModel)
         Thread.sleep(1000)
         val titleOnlyProductDTO = ProductDTO("patched")
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<ProductDTO>(titleOnlyProductDTO,headers)
 
         val patchResponse = restTemplate.exchange(
@@ -284,7 +308,7 @@ class ProductControllerTest @Autowired constructor(
             object : ParameterizedTypeReference<RestResponsePage<ProductView>>() {}
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
 
         val response: ResponseEntity<RestResponsePage<ProductView>> = restTemplate.exchange(
@@ -322,7 +346,7 @@ class ProductControllerTest @Autowired constructor(
             object : ParameterizedTypeReference<RestResponsePage<ProductView>>() {}
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
 
         val response: ResponseEntity<RestResponsePage<ProductView>> = restTemplate.exchange(
@@ -356,7 +380,7 @@ class ProductControllerTest @Autowired constructor(
             object : ParameterizedTypeReference<RestResponsePage<ProductView>>() {}
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
 
         val response: ResponseEntity<RestResponsePage<ProductView>> = restTemplate.exchange(
@@ -373,7 +397,7 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `should return initial product by near search with city name and date range search`() {
+    fun `should return initial product by near search with city name AND date range search`() {
         saveOneProduct(initialProductModel)
 
         var secondProduct = initialProductModel.copy()
@@ -392,7 +416,7 @@ class ProductControllerTest @Autowired constructor(
             object : ParameterizedTypeReference<RestResponsePage<ProductView>>() {}
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
 
         val response: ResponseEntity<RestResponsePage<ProductView>> = restTemplate.exchange(
@@ -409,6 +433,37 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
+    fun `should return NOT_FOUND for near search with nonsense city name and valid date range search`() {
+        saveOneProduct(initialProductModel)
+
+        var secondProduct = initialProductModel.copy()
+        secondProduct.id = ObjectId.get().toString()
+        secondProduct.location = listOf(9.1938525,48.8848654)
+
+        val searchTerm = initialProductModel.title
+        val searchDistance = 20
+        val cityName = "dfghiufdghkjdfgs"
+        val startDate = "2021-12-12"
+        val endDate = "2021-12-20"
+
+        saveOneProduct(secondProduct)
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
+        val entity = HttpEntity<String>(headers)
+
+        val response = restTemplate.exchange(
+            getRootUrl() + "/products/findNearCity?term=$searchTerm&distance=$searchDistance&cityIdentifier=$cityName&startDate=$startDate&endDate=$endDate",
+            HttpMethod.GET,
+            entity,
+            ErrorResponse::class.java
+        )
+
+        assertEquals(404, response.statusCode.value())
+        assertEquals(LocationNotFoundException(cityName).message, response.body?.message)
+    }
+
+    @Test
     fun `should accept rent request by adding rent request as rent to product and change rentRequest status to accepted`() {
         saveOneProduct(initialProductModel)
 
@@ -421,7 +476,7 @@ class ProductControllerTest @Autowired constructor(
         ))
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
         val response = restTemplate.exchange(
             getRootUrl() + "/products/${defaultProductId}/rent/${createdRR.id}?isAccepted=true",
@@ -438,6 +493,63 @@ class ProductControllerTest @Autowired constructor(
     }
 
     @Test
+    fun `should reject rent request by setting status in rent request to rejected`() {
+        saveOneProduct(initialProductModel)
+
+        val createdRentRequest = rentRequestRepository.save(RentRequestModel(
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = defaultProductId
+        ))
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
+        val entity = HttpEntity<String>(headers)
+        val response = restTemplate.exchange(
+            getRootUrl() + "/products/${defaultProductId}/rent/${createdRentRequest.id}?isAccepted=false",
+            HttpMethod.POST,
+            entity,
+            RentRequestView::class.java
+        )
+
+        val productInDatabase = productRepository.findById(defaultProductId).orElseThrow { ProductNotFoundException(defaultProductId) }
+        val acceptedRentRequestInDatabase = rentRequestRepository.findById(createdRentRequest.id).orElseThrow { RentRequestNotFoundException(createdRentRequest.id)}
+        assertEquals(200, response.statusCode.value())
+        assertNull(productInDatabase.rents?.find {it.rentId == createdRentRequest.id})
+        assertEquals("rejected", acceptedRentRequestInDatabase.status)
+    }
+
+    @Test
+    fun `should return BAD REQUEST as product id provided in url is not equal to product id in rent request`() {
+        saveOneProduct(initialProductModel)
+        var secondProduct = initialProductModel.copy()
+        secondProduct.id = ObjectId.get().toString()
+        saveOneProduct(secondProduct)
+
+        val createdRentRequest = rentRequestRepository.save(RentRequestModel(
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = defaultProductId
+        ))
+
+        val headers = HttpHeaders()
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
+        val entity = HttpEntity<String>(headers)
+        val response = restTemplate.exchange(
+            getRootUrl() + "/products/${secondProduct.id}/rent/${createdRentRequest.id}?isAccepted=true",
+            HttpMethod.POST,
+            entity,
+            RentRequestView::class.java
+        )
+
+        assertEquals(400, response.statusCode.value())
+    }
+
+    @Test
     fun `should create new rent request`() {
         saveOneProduct(initialProductModel)
         val rentRequest = RentRequestDTO(
@@ -447,7 +559,7 @@ class ProductControllerTest @Autowired constructor(
         )
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<RentRequestDTO>(rentRequest, headers)
 
         val response = restTemplate.exchange(
@@ -479,7 +591,7 @@ class ProductControllerTest @Autowired constructor(
         ))
 
         val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
+        headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<String>(headers)
 
         val deleteResponse = restTemplate.exchange(
@@ -491,143 +603,6 @@ class ProductControllerTest @Autowired constructor(
 
         assertEquals(200, deleteResponse.statusCode.value())
         assertFalse(rentRequestRepository.findById(rentRequestStoredInDatabase.id).isPresent)
-    }
-
-    @Test
-    fun `should create new user`() {
-        val userRequest = UserDTO(profilePictureURL="www.test.de/12312498", forename="Thomas", surname="test", postalCode="12345", address="test", city="test", rating="2")
-
-        val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
-        val entity = HttpEntity<UserDTO>(userRequest, headers)
-
-        val response = restTemplate.exchange(
-            getRootUrl()+"/user",
-            HttpMethod.POST,
-            entity,
-            UserView::class.java
-        )
-
-        assertEquals(200, response.statusCode.value())
-        assertNotNull(response.body)
-        assertEquals(testUser1Id, response.body?.id)
-        assertEquals(userRequest.profilePictureURL, response.body?.profilePictureURL)
-        assertEquals(userRequest.forename, response.body?.forename)
-
-    }
-
-    @Test
-    fun `should return current authorized user`(){
-        val userToCreate = UserModel(id=testUser1Id, profilePictureURL="www.test.de/12312498", forename="Thomas", surname="test", postalCode="12345", address="test", city="test", rating="2")
-        userRepository.save(userToCreate)
-
-        val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
-        val entity = HttpEntity<String>(headers)
-
-        val response = restTemplate.exchange(
-            getRootUrl()+"/user",
-            HttpMethod.GET,
-            entity,
-            UserView::class.java
-        )
-
-        assertEquals(200, response.statusCode.value())
-        assertNotNull(response.body)
-        assertEquals(testUser1Id, response.body?.id)
-        assertEquals(userToCreate.profilePictureURL, response.body?.profilePictureURL)
-    }
-
-    @Test
-    fun `should return offered products of authorized user`(){
-        saveOneProduct(initialProductModel)
-        var secondProduct = initialProductModel.copy()
-        secondProduct.id = ObjectId.get().toString()
-        saveOneProduct(secondProduct)
-
-        val rentRequestStoredInDatabase = rentRequestRepository.save(RentRequestModel(
-            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requestedProductId = defaultProductId,
-            rentRequestReceiverUserId = testUser1Id,
-            requesterUserId = testUser1Id
-        ))
-
-
-        val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
-        val entity = HttpEntity<String>(headers)
-
-        val responseType: ParameterizedTypeReference<MutableList<UserProductsWithRentRequestsView>> =
-            object : ParameterizedTypeReference<MutableList<UserProductsWithRentRequestsView>>() {}
-
-        val response = restTemplate.exchange(
-            getRootUrl()+"/user/offeredProductsOverview",
-            HttpMethod.GET,
-            entity,
-            responseType
-        )
-
-        assertEquals(200, response.statusCode.value())
-        assertNotNull(response.body)
-        assertEquals(2, response.body?.size)
-        assertTrue(response.body?.get(0)?.rentRequests!!.size==1)
-        assertTrue(response.body?.get(1)?.rentRequests!!.isEmpty())
-    }
-
-    @Test
-    fun `should return rent requests started by authorized user`(){
-        saveOneProduct(initialProductModel)
-        var secondProduct = initialProductModel.copy()
-        secondProduct.id = ObjectId.get().toString()
-        saveOneProduct(secondProduct)
-
-        val rentRequestByAuthUserForProduct1StoredInDatabase = rentRequestRepository.save(RentRequestModel(
-            fromDate = LocalDate.parse("2021-12-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-21", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requestedProductId = defaultProductId,
-            rentRequestReceiverUserId = "1234",
-            requesterUserId = testUser1Id
-        ))
-
-        val rentRequestByAuthUserForProduct2StoredInDatabase = rentRequestRepository.save(RentRequestModel(
-            fromDate = LocalDate.parse("2021-12-22", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-27", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requestedProductId = secondProduct.id,
-            rentRequestReceiverUserId = "1234",
-            requesterUserId = testUser1Id
-        ))
-
-        val rentRequestByOtherUserForProduct1StoredInDatabase = rentRequestRepository.save(RentRequestModel(
-            fromDate = LocalDate.parse("2021-12-22", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-27", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requestedProductId = defaultProductId,
-            rentRequestReceiverUserId = "1234",
-            requesterUserId = "5678"
-        ))
-
-        val headers = HttpHeaders()
-        headers.add("Authorization", "Bearer "+login("tset123456@web.de","ackeracker123"))
-        val entity = HttpEntity<String>(headers)
-
-        val responseType: ParameterizedTypeReference<MutableList<UserSentRentRequestsWithProductsView>> =
-            object : ParameterizedTypeReference<MutableList<UserSentRentRequestsWithProductsView>>() {}
-
-        val response = restTemplate.exchange(
-            getRootUrl()+"/user/requestedProductsOverview",
-            HttpMethod.GET,
-            entity,
-            responseType
-        )
-
-        assertEquals(200, response.statusCode.value())
-        assertNotNull(response.body)
-        assertNotNull(response.body?.size==2)
-        assertEquals(rentRequestByAuthUserForProduct1StoredInDatabase.id, response.body?.get(0)?.rentRequest?.id)
-        assertEquals(defaultProductId, response.body?.get(0)?.product?.id)
-        assertEquals(rentRequestByAuthUserForProduct2StoredInDatabase.id, response.body?.get(1)?.rentRequest?.id)
-        assertEquals(secondProduct.id, response.body?.get(1)?.product?.id)
-
     }
 
     private fun getRootUrl(): String = "http://localhost:$port/api/v1"
