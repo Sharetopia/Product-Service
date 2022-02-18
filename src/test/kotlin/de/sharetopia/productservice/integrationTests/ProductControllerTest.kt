@@ -1,7 +1,10 @@
 package de.sharetopia.productservice.integrationTests
 
 import RestResponsePage
-import de.sharetopia.productservice.product.dto.*
+import de.sharetopia.productservice.product.dto.ProductDTO
+import de.sharetopia.productservice.product.dto.ProductView
+import de.sharetopia.productservice.product.dto.RentRequestDTO
+import de.sharetopia.productservice.product.dto.RentRequestView
 import de.sharetopia.productservice.product.exception.*
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ElasticProductRepository
@@ -22,7 +25,10 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -38,28 +44,29 @@ class ProductControllerTest @Autowired constructor(
     private val rentRequestRepository: RentRequestRepository,
     private val userRepository: UserRepository,
     private val restTemplate: TestRestTemplate
-){
+) {
 
     private val authorizationUtils = AuthorizationUtils()
     private val defaultProductId = ObjectId.get().toString()
     private val testUser1Id = "204e1304-26f0-47b5-b353-cee12f4c8d34"
-    private val accessTokenTestUser1 = authorizationUtils.login("tset123456@web.de","ackeracker123")
+    private val accessTokenTestUser1 = authorizationUtils.login("tset123456@web.de", "ackeracker123")
 
     private val initialProductModel: ProductModel = ProductModel(
         defaultProductId,
-        title="Rennrad Rot",
-        description="Das ist mein rotes Rennrad",
-        ownerOfProductUserId="204e1304-26f0-47b5-b353-cee12f4c8d34",
-        tags=listOf("Fahrrad", "Mobilität"),
-        price= BigDecimal(12.99),
-        address = Address("Nobelstraße 10","Stuttgart", "70569"),
-        location = listOf(9.100591,48.7419328),
+        title = "Rennrad Rot",
+        description = "Das ist mein rotes Rennrad",
+        ownerOfProductUserId = "204e1304-26f0-47b5-b353-cee12f4c8d34",
+        tags = listOf("Fahrrad", "Mobilität"),
+        price = BigDecimal(12.99),
+        address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+        location = listOf(9.100591, 48.7419328),
         rentableDateRange = DateRangeDuration(
             LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
             LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         ),
         rents = mutableListOf(
-            Rent("3242354",
+            Rent(
+                "3242354",
                 DateRangeDuration(
                     LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
@@ -95,7 +102,7 @@ class ProductControllerTest @Autowired constructor(
         val entity = HttpEntity<String>(headers)
 
         val response = restTemplate.exchange(
-            getRootUrl()+"/products",
+            getRootUrl() + "/products",
             HttpMethod.GET,
             entity,
             responseType
@@ -152,7 +159,7 @@ class ProductControllerTest @Autowired constructor(
         headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<ProductDTO>(productRequest, headers)
         val response = restTemplate.exchange(
-            getRootUrl()+"/products",
+            getRootUrl() + "/products",
             HttpMethod.POST,
             entity,
             ProductView::class.java
@@ -166,22 +173,22 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(productRequest.price, response.body?.price)
         assertEquals(productRequest.address, response.body?.address)
         assertThat(productRequest.rentableDateRange)
-        .usingRecursiveComparison().isEqualTo(response.body?.rentableDateRange)
+            .usingRecursiveComparison().isEqualTo(response.body?.rentableDateRange)
         assertThat(productRequest.rents)
-        .usingRecursiveComparison().isEqualTo(response.body?.rents)
+            .usingRecursiveComparison().isEqualTo(response.body?.rents)
     }
 
     @Test
     fun `should return NOT FOUND for trying to create product with invalid address`() {
         var productDTOwithInvalidAddress = prepareProductRequest()
-        productDTOwithInvalidAddress.address = Address("","","")
+        productDTOwithInvalidAddress.address = Address("", "", "")
 
         val headers = HttpHeaders()
         headers.add("Authorization", "Bearer $accessTokenTestUser1")
         val entity = HttpEntity<ProductDTO>(productDTOwithInvalidAddress, headers)
 
         val response = restTemplate.exchange(
-            getRootUrl()+"/products",
+            getRootUrl() + "/products",
             HttpMethod.POST,
             entity,
             ErrorResponse::class.java
@@ -215,7 +222,8 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(productRequest.tags, updateResponse.body?.tags)
         assertEquals(productRequest.price, updateResponse.body?.price)
         assertEquals(productRequest.address, updateResponse.body?.address)
-        assertThat(productRequest.rentableDateRange).usingRecursiveComparison().isEqualTo(updateResponse.body?.rentableDateRange)
+        assertThat(productRequest.rentableDateRange).usingRecursiveComparison()
+            .isEqualTo(updateResponse.body?.rentableDateRange)
         assertThat(productRequest.rents).usingRecursiveComparison().isEqualTo(updateResponse.body?.rents)
     }
 
@@ -269,7 +277,7 @@ class ProductControllerTest @Autowired constructor(
 
         val headers = HttpHeaders()
         headers.add("Authorization", "Bearer $accessTokenTestUser1")
-        val entity = HttpEntity<ProductDTO>(titleOnlyProductDTO,headers)
+        val entity = HttpEntity<ProductDTO>(titleOnlyProductDTO, headers)
 
         val patchResponse = restTemplate.exchange(
             getRootUrl() + "/products/$defaultProductId",
@@ -283,7 +291,8 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(initialProductModel.price, patchResponse.body?.price)
         assertEquals(initialProductModel.tags, patchResponse.body?.tags)
         assertEquals(initialProductModel.address, patchResponse.body?.address)
-        assertThat(initialProductModel.rentableDateRange).usingRecursiveComparison().isEqualTo(patchResponse.body?.rentableDateRange)
+        assertThat(initialProductModel.rentableDateRange).usingRecursiveComparison()
+            .isEqualTo(patchResponse.body?.rentableDateRange)
         assertThat(initialProductModel.rents).usingRecursiveComparison().isEqualTo(patchResponse.body?.rents)
     }
 
@@ -313,8 +322,8 @@ class ProductControllerTest @Autowired constructor(
         val productViewList: List<ProductView> = response.body!!.content
 
         assertEquals(200, response.statusCode.value())
-        assertEquals(defaultProductId,productViewList[0].id)
-        assertEquals(secondProduct.id,productViewList[1].id)
+        assertEquals(defaultProductId, productViewList[0].id)
+        assertEquals(secondProduct.id, productViewList[1].id)
         assertEquals(2, productViewList.size)
     }
 
@@ -324,7 +333,7 @@ class ProductControllerTest @Autowired constructor(
 
         var secondProduct = initialProductModel.copy()
         secondProduct.id = ObjectId.get().toString()
-        secondProduct.location = listOf(9.1938525,48.8848654)
+        secondProduct.location = listOf(9.1938525, 48.8848654)
 
         val searchTerm = initialProductModel.title
         val searchDistance = 10
@@ -349,7 +358,7 @@ class ProductControllerTest @Autowired constructor(
         val productViewList: List<ProductView> = response.body!!.content
 
         assertEquals(200, response.statusCode.value())
-        assertEquals(defaultProductId,productViewList[0].id)
+        assertEquals(defaultProductId, productViewList[0].id)
     }
 
     @Test
@@ -358,7 +367,7 @@ class ProductControllerTest @Autowired constructor(
 
         var secondProduct = initialProductModel.copy()
         secondProduct.id = ObjectId.get().toString()
-        secondProduct.location = listOf(9.1938525,48.8848654)
+        secondProduct.location = listOf(9.1938525, 48.8848654)
 
         val searchTerm = initialProductModel.title
         val searchDistance = 20
@@ -383,7 +392,7 @@ class ProductControllerTest @Autowired constructor(
         val productViewList: List<ProductView> = response.body!!.content
 
         assertEquals(200, response.statusCode.value())
-        assertEquals(defaultProductId,productViewList[0].id)
+        assertEquals(defaultProductId, productViewList[0].id)
     }
 
     @Test
@@ -392,7 +401,7 @@ class ProductControllerTest @Autowired constructor(
 
         var secondProduct = initialProductModel.copy()
         secondProduct.id = ObjectId.get().toString()
-        secondProduct.location = listOf(9.1938525,48.8848654)
+        secondProduct.location = listOf(9.1938525, 48.8848654)
 
         val searchTerm = initialProductModel.title
         val searchDistance = 20
@@ -419,7 +428,7 @@ class ProductControllerTest @Autowired constructor(
         val productViewList: List<ProductView> = response.body!!.content
 
         assertEquals(200, response.statusCode.value())
-        assertEquals(defaultProductId,productViewList[0].id)
+        assertEquals(defaultProductId, productViewList[0].id)
     }
 
     @Test
@@ -428,7 +437,7 @@ class ProductControllerTest @Autowired constructor(
 
         var secondProduct = initialProductModel.copy()
         secondProduct.id = ObjectId.get().toString()
-        secondProduct.location = listOf(9.1938525,48.8848654)
+        secondProduct.location = listOf(9.1938525, 48.8848654)
 
         val searchTerm = initialProductModel.title
         val searchDistance = 20
@@ -457,13 +466,15 @@ class ProductControllerTest @Autowired constructor(
     fun `should accept rent request by adding rent request as rent to product and change rentRequest status to accepted`() {
         saveOneProduct(initialProductModel)
 
-        val createdRR = rentRequestRepository.save(RentRequestModel(
-            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requesterUserId = "1234",
-            rentRequestReceiverUserId = "5678",
-            requestedProductId = defaultProductId
-        ))
+        val createdRR = rentRequestRepository.save(
+            RentRequestModel(
+                fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                requesterUserId = "1234",
+                rentRequestReceiverUserId = "5678",
+                requestedProductId = defaultProductId
+            )
+        )
 
         val headers = HttpHeaders()
         headers.add("Authorization", "Bearer $accessTokenTestUser1")
@@ -475,10 +486,12 @@ class ProductControllerTest @Autowired constructor(
             RentRequestView::class.java
         )
 
-        val productInDatabase = productRepository.findById(defaultProductId).orElseThrow { ProductNotFoundException(defaultProductId) }
-        val acceptedRentRequestInDatabase = rentRequestRepository.findById(createdRR.id).orElseThrow { RentRequestNotFoundException(createdRR.id)}
+        val productInDatabase =
+            productRepository.findById(defaultProductId).orElseThrow { ProductNotFoundException(defaultProductId) }
+        val acceptedRentRequestInDatabase =
+            rentRequestRepository.findById(createdRR.id).orElseThrow { RentRequestNotFoundException(createdRR.id) }
         assertEquals(200, response.statusCode.value())
-        assertNotNull(productInDatabase.rents?.find {it.rentId == createdRR.id})
+        assertNotNull(productInDatabase.rents?.find { it.rentId == createdRR.id })
         assertEquals("accepted", acceptedRentRequestInDatabase.status)
     }
 
@@ -486,13 +499,15 @@ class ProductControllerTest @Autowired constructor(
     fun `should reject rent request by setting status in rent request to rejected`() {
         saveOneProduct(initialProductModel)
 
-        val createdRentRequest = rentRequestRepository.save(RentRequestModel(
-            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requesterUserId = "1234",
-            rentRequestReceiverUserId = "5678",
-            requestedProductId = defaultProductId
-        ))
+        val createdRentRequest = rentRequestRepository.save(
+            RentRequestModel(
+                fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                requesterUserId = "1234",
+                rentRequestReceiverUserId = "5678",
+                requestedProductId = defaultProductId
+            )
+        )
 
         val headers = HttpHeaders()
         headers.add("Authorization", "Bearer $accessTokenTestUser1")
@@ -504,10 +519,12 @@ class ProductControllerTest @Autowired constructor(
             RentRequestView::class.java
         )
 
-        val productInDatabase = productRepository.findById(defaultProductId).orElseThrow { ProductNotFoundException(defaultProductId) }
-        val acceptedRentRequestInDatabase = rentRequestRepository.findById(createdRentRequest.id).orElseThrow { RentRequestNotFoundException(createdRentRequest.id)}
+        val productInDatabase =
+            productRepository.findById(defaultProductId).orElseThrow { ProductNotFoundException(defaultProductId) }
+        val acceptedRentRequestInDatabase = rentRequestRepository.findById(createdRentRequest.id)
+            .orElseThrow { RentRequestNotFoundException(createdRentRequest.id) }
         assertEquals(200, response.statusCode.value())
-        assertNull(productInDatabase.rents?.find {it.rentId == createdRentRequest.id})
+        assertNull(productInDatabase.rents?.find { it.rentId == createdRentRequest.id })
         assertEquals("rejected", acceptedRentRequestInDatabase.status)
     }
 
@@ -518,13 +535,15 @@ class ProductControllerTest @Autowired constructor(
         secondProduct.id = ObjectId.get().toString()
         saveOneProduct(secondProduct)
 
-        val createdRentRequest = rentRequestRepository.save(RentRequestModel(
-            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requesterUserId = "1234",
-            rentRequestReceiverUserId = "5678",
-            requestedProductId = defaultProductId
-        ))
+        val createdRentRequest = rentRequestRepository.save(
+            RentRequestModel(
+                fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                requesterUserId = "1234",
+                rentRequestReceiverUserId = "5678",
+                requestedProductId = defaultProductId
+            )
+        )
 
         val headers = HttpHeaders()
         headers.add("Authorization", "Bearer $accessTokenTestUser1")
@@ -553,7 +572,7 @@ class ProductControllerTest @Autowired constructor(
         val entity = HttpEntity<RentRequestDTO>(rentRequest, headers)
 
         val response = restTemplate.exchange(
-            getRootUrl()+"/rentRequest",
+            getRootUrl() + "/rentRequest",
             HttpMethod.POST,
             entity,
             RentRequestView::class.java
@@ -572,13 +591,15 @@ class ProductControllerTest @Autowired constructor(
     fun `should delete existing rent request`() {
         saveOneProduct(initialProductModel)
 
-        val rentRequestStoredInDatabase = rentRequestRepository.save(RentRequestModel(
-            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requestedProductId = defaultProductId,
-            rentRequestReceiverUserId = testUser1Id,
-            requesterUserId = testUser1Id
-        ))
+        val rentRequestStoredInDatabase = rentRequestRepository.save(
+            RentRequestModel(
+                fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                requestedProductId = defaultProductId,
+                rentRequestReceiverUserId = testUser1Id,
+                requesterUserId = testUser1Id
+            )
+        )
 
         val headers = HttpHeaders()
         headers.add("Authorization", "Bearer $accessTokenTestUser1")
@@ -598,30 +619,31 @@ class ProductControllerTest @Autowired constructor(
     private fun getRootUrl(): String = "http://localhost:$port/api/v1"
 
 
-    private fun saveOneProduct(productModel: ProductModel){
+    private fun saveOneProduct(productModel: ProductModel) {
         val createdProductModel = productRepository.save(productModel)
         elasticProductRepository.save(ObjectMapperUtils.map(createdProductModel, ElasticProductModel::class.java))
     }
 
     private fun prepareProductRequest() = ProductDTO(
-        title="Piaggio Roller",
+        title = "Piaggio Roller",
         description = "Das ist mein weißer Piaggio Roller",
-        tags=listOf("Mobilität", "Roller"),
-        price=BigDecimal(10.99),
-        address=Address("Obere Bahnhofstraße 1","Backnang", "71522"),
+        tags = listOf("Mobilität", "Roller"),
+        price = BigDecimal(10.99),
+        address = Address("Obere Bahnhofstraße 1", "Backnang", "71522"),
         rentableDateRange = DateRangeDuration(
             LocalDate.parse("2021-01-01", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
             LocalDate.parse("2025-01-01", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         ),
         rents = mutableListOf(
-            Rent("1234",
-                    DateRangeDuration(
-                        LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                        LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                    ),
+            Rent(
+                "1234",
+                DateRangeDuration(
+                    LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                ),
                 "235423532453453"
-                )
             )
+        )
     )
 
 }

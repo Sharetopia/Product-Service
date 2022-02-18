@@ -1,6 +1,7 @@
 package de.sharetopia.productservice.product.model
 
-import org.springframework.data.elasticsearch.annotations.*
+import org.springframework.data.elasticsearch.annotations.Field
+import org.springframework.data.elasticsearch.annotations.FieldType
 
 class Rent(
     @Field(type = FieldType.Text, name = "renterUserId")

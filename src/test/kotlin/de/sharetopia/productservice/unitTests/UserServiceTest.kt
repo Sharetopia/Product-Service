@@ -1,11 +1,9 @@
 package de.sharetopia.productservice.unitTests
 
 import de.sharetopia.productservice.product.dto.UserDTO
-import de.sharetopia.productservice.product.exception.UserNotFoundException
 import de.sharetopia.productservice.product.model.UserModel
 import de.sharetopia.productservice.product.repository.UserRepository
 import de.sharetopia.productservice.product.service.UserService
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -47,12 +45,12 @@ class UserServiceTest {
         userService.save(userToCreate, "1234")
         verify(userRepository, times(1)).save(argThat {
             (id === "1234") &&
-            (profilePictureURL === userToCreate.profilePictureURL) &&
-            (forename === userToCreate.forename) &&
-            (surname === userToCreate.surname) &&
-            (address === userToCreate.address) &&
-            (rating === userToCreate.rating) &&
-            (postalCode === userToCreate.postalCode)
+                    (profilePictureURL === userToCreate.profilePictureURL) &&
+                    (forename === userToCreate.forename) &&
+                    (surname === userToCreate.surname) &&
+                    (address === userToCreate.address) &&
+                    (rating === userToCreate.rating) &&
+                    (postalCode === userToCreate.postalCode)
         })
     }
 
@@ -74,12 +72,12 @@ class UserServiceTest {
 
         verify(userRepository, times(1)).save(argThat {
             (id === "1234") &&
-            (profilePictureURL === "www.test.de/1234") &&
-            (forename === "Thomas") &&
-            (surname === "Test") &&
-            (address === "Testweg 12") &&
-            (rating === "5") &&
-            (postalCode === "404")
+                    (profilePictureURL === "www.test.de/1234") &&
+                    (forename === "Thomas") &&
+                    (surname === "Test") &&
+                    (address === "Testweg 12") &&
+                    (rating === "5") &&
+                    (postalCode === "404")
         })
     }
 
@@ -103,16 +101,16 @@ class UserServiceTest {
         whenever(userRepository.save(any<UserModel>())).doAnswer { it.arguments[0] as UserModel }
 
         //test
-        val userReturnedByUser = userService.partialUpdate("1234", mockedUserInDb, updatedFieldsUser)
+        userService.partialUpdate("1234", mockedUserInDb, updatedFieldsUser)
 
         verify(userRepository, times(1)).save(argThat { userModel: UserModel ->
             (userModel.id === mockedUserInDb.id) &&
-            (userModel.profilePictureURL === mockedUserInDb.profilePictureURL) &&
-            (userModel.forename === mockedUserInDb.forename) &&
-            (userModel.surname === mockedUserInDb.surname) &&
-            (userModel.address === mockedUserInDb.address) &&
-            (userModel.rating === updatedFieldsUser.rating) &&
-            (userModel.postalCode === mockedUserInDb.postalCode)
+                    (userModel.profilePictureURL === mockedUserInDb.profilePictureURL) &&
+                    (userModel.forename === mockedUserInDb.forename) &&
+                    (userModel.surname === mockedUserInDb.surname) &&
+                    (userModel.address === mockedUserInDb.address) &&
+                    (userModel.rating === updatedFieldsUser.rating) &&
+                    (userModel.postalCode === mockedUserInDb.postalCode)
         })
     }
 
@@ -130,7 +128,7 @@ class UserServiceTest {
         whenever(userRepository.findById(any<String>())).thenReturn(Optional.of(mockedUserInDb))
 
         //test
-        val userReturnedByUser = userService.findById("1234")
+        userService.findById("1234")
         verify(userRepository, times(1)).findById("1234")
     }
 }

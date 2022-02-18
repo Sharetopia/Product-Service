@@ -14,7 +14,7 @@ class ElasticProductService {
     @Autowired
     private lateinit var elasticProductRepository: ElasticProductRepository
 
-    fun save(elasticProduct: ElasticProductModel): ElasticProductModel{
+    fun save(elasticProduct: ElasticProductModel): ElasticProductModel {
         return elasticProductRepository.save(elasticProduct)
     }
 
@@ -22,21 +22,53 @@ class ElasticProductService {
         return elasticProductRepository.findByTitle(searchTerm, paging)
     }
 
-    fun findByTitleAndNearCoordinates(searchTerm: String, distance: Int, lat:Double, lon: Double, pageable:Pageable): Page<ElasticProductModel>{
+    fun findByTitleAndNearCoordinates(
+        searchTerm: String,
+        distance: Int,
+        lat: Double,
+        lon: Double,
+        pageable: Pageable
+    ): Page<ElasticProductModel> {
         return elasticProductRepository.findByTitleAndNear(searchTerm, distance, lat, lon, pageable)
     }
 
-    fun findByTitleAndNearCity(searchTerm: String, distance: Int ,cityIdentifier: String, pageable: Pageable): Page<ElasticProductModel>{
+    fun findByTitleAndNearCity(
+        searchTerm: String,
+        distance: Int,
+        cityIdentifier: String,
+        pageable: Pageable
+    ): Page<ElasticProductModel> {
         val geoCodedCoordinates = GeoCoder.getCoordinatesForCity(cityIdentifier)
-        return elasticProductRepository.findByTitleAndNear(searchTerm, distance, geoCodedCoordinates[1], geoCodedCoordinates[0], pageable)
+        return elasticProductRepository.findByTitleAndNear(
+            searchTerm,
+            distance,
+            geoCodedCoordinates[1],
+            geoCodedCoordinates[0],
+            pageable
+        )
     }
 
-    fun findByTitleAndNearCityWithDate(searchTerm: String, distance: Int, cityIdentifier: String, startDate: LocalDate, endDate: LocalDate, pageable: Pageable): Page<ElasticProductModel>{
+    fun findByTitleAndNearCityWithDate(
+        searchTerm: String,
+        distance: Int,
+        cityIdentifier: String,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        pageable: Pageable
+    ): Page<ElasticProductModel> {
         val geoCodedCoordinates = GeoCoder.getCoordinatesForCity(cityIdentifier)
-        return elasticProductRepository.findByTitleOrTagsAndAvailabilityAndNear(searchTerm, distance, geoCodedCoordinates[1], geoCodedCoordinates[0],startDate, endDate, pageable)
+        return elasticProductRepository.findByTitleOrTagsAndAvailabilityAndNear(
+            searchTerm,
+            distance,
+            geoCodedCoordinates[1],
+            geoCodedCoordinates[0],
+            startDate,
+            endDate,
+            pageable
+        )
     }
 
-    fun deleteById(productId: String){
+    fun deleteById(productId: String) {
         elasticProductRepository.deleteById(productId)
     }
 

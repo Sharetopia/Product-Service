@@ -9,15 +9,16 @@ import java.math.BigDecimal
 
 
 @Document(collection = "products")
-public data class ProductModel(@Id var id: String = ObjectId.get().toString(),
-                               var title: String="",
-                               var ownerOfProductUserId: String="",
-                               var description: String="",
-                               var tags: List<String> = listOf(),
-                               var price: BigDecimal = BigDecimal.ZERO,
-                               var address: Address = Address("","",""),
-                               @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
-                               var location: List<Double>?=null,
-                               var rentableDateRange: DateRangeDuration? = null,
-                               var rents: MutableList<Rent>?=null
-                               )
+data class ProductModel(
+    @Id var id: String = ObjectId.get().toString(),
+    var title: String = "",
+    var ownerOfProductUserId: String = "",
+    var description: String = "",
+    var tags: List<String> = listOf(),
+    var price: BigDecimal = BigDecimal.ZERO,
+    var address: Address = Address("", "", ""),
+    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
+    var location: List<Double>? = null,
+    var rentableDateRange: DateRangeDuration? = null,
+    var rents: MutableList<Rent>? = null
+)

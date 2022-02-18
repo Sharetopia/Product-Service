@@ -13,11 +13,12 @@ class ProductExceptionHandler {
         RentRequestNotFoundException::class,
         UserNotFoundException::class
     )
-    fun handleNotFoundException(exc : HttpException) : ResponseEntity<ErrorResponse> {
+    fun handleNotFoundException(exc: HttpException): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(
             exc.errorCode,
             exc.message ?: "Resource not found",
-            System.currentTimeMillis())
+            System.currentTimeMillis()
+        )
 
         return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
@@ -26,11 +27,12 @@ class ProductExceptionHandler {
         productIdUrlBodyMismatchException::class,
         InvalidDateRangeSearchException::class,
     )
-    fun handleBadRequestException(exc : HttpException) : ResponseEntity<ErrorResponse> {
+    fun handleBadRequestException(exc: HttpException): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(
             exc.errorCode,
             exc.message ?: "Invalid request",
-            System.currentTimeMillis())
+            System.currentTimeMillis()
+        )
 
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
@@ -38,20 +40,23 @@ class ProductExceptionHandler {
     @ExceptionHandler(
         NotAllowedAccessToResourceException::class
     )
-    fun handleNotAllowedAccessRequestException(exc : HttpException) : ResponseEntity<ErrorResponse> {
+    fun handleNotAllowedAccessRequestException(exc: HttpException): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(
             exc.errorCode,
             exc.message ?: "Not allowed to access this resource",
-            System.currentTimeMillis())
+            System.currentTimeMillis()
+        )
 
         return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
     }
 
     @ExceptionHandler
-    fun handleGenericException(exc : Exception) : ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+    fun handleGenericException(exc: Exception): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(
+            HttpStatus.INTERNAL_SERVER_ERROR,
             exc.message ?: "Internal Server Error",
-            System.currentTimeMillis())
+            System.currentTimeMillis()
+        )
 
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }

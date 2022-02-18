@@ -302,7 +302,13 @@ class ProductServiceTest {
         `when`(productRepository.findById(anyString())).thenReturn(Optional.of(mockedProductInDb))
         whenever(productRepository.save(any<ProductModel>())).doAnswer { it.arguments[0] as ProductModel }
 
-        assertThrows(NotAllowedAccessToResourceException::class.java) { productService.updateOrInsert("12345", updateProduct, userId = "1234") }
+        assertThrows(NotAllowedAccessToResourceException::class.java) {
+            productService.updateOrInsert(
+                "12345",
+                updateProduct,
+                userId = "1234"
+            )
+        }
     }
 
     @Test
@@ -391,7 +397,7 @@ class ProductServiceTest {
         `when`(productRepository.findById(productInDb.id)).thenReturn(Optional.of(productInDb))
 
         //test
-        val productReturnedByService = productService.findById("12345").get()
+        productService.findById("12345").get()
         verify(productRepository, times(1)).findById(productInDb.id)
     }
 
@@ -470,7 +476,7 @@ class ProductServiceTest {
         ).thenReturn(RestResponsePage<ProductModel>(productList))
 
         //test
-        val productListReturnedByService = productService.findManyById(listOf("12345", "5678"), PageRequest.of(0, 10))
+        productService.findManyById(listOf("12345", "5678"), PageRequest.of(0, 10))
 
         verify(productRepository, times(1)).findByIdIn(listOf("12345", "5678"), PageRequest.of(0, 10))
     }
@@ -529,7 +535,7 @@ class ProductServiceTest {
         )
 
         //test
-        val rentRequestReturnedByService = productService.acceptOrRejectRentRequest("3333", "2222", true, "5678")
+        productService.acceptOrRejectRentRequest("3333", "2222", true, "5678")
 
         verify(rentRequestService, times(1)).findById("2222")
         verify(productRepository, times(1)).findById("3333")
@@ -539,7 +545,7 @@ class ProductServiceTest {
 
     @Test
     fun `should throw RentRequestNotFoundException when trying to accept reject non-existing rent request`() {
-        val productInDb = ProductModel(
+        ProductModel(
             id = "3333",
             title = "Rennrad Rot",
             description = "Das ist mein rotes Rennrad",
@@ -564,7 +570,14 @@ class ProductServiceTest {
             )
         )
 
-        assertThrows(RentRequestNotFoundException::class.java) { productService.acceptOrRejectRentRequest("12345", "124223532523", true, "1234") }
+        assertThrows(RentRequestNotFoundException::class.java) {
+            productService.acceptOrRejectRentRequest(
+                "12345",
+                "124223532523",
+                true,
+                "1234"
+            )
+        }
     }
 
     @Test
@@ -578,7 +591,7 @@ class ProductServiceTest {
             requestedProductId = "3333"
         )
 
-        val productInDb = ProductModel(
+        ProductModel(
             id = "3333",
             title = "Rennrad Rot",
             description = "Das ist mein rotes Rennrad",
@@ -603,7 +616,14 @@ class ProductServiceTest {
             )
         )
         whenever(rentRequestService.findById("2222")).thenReturn(Optional.of(rentRequestInDBMocked))
-        assertThrows(ProductNotFoundException::class.java) { productService.acceptOrRejectRentRequest("235235456345", "2222", true, "1234") }
+        assertThrows(ProductNotFoundException::class.java) {
+            productService.acceptOrRejectRentRequest(
+                "235235456345",
+                "2222",
+                true,
+                "1234"
+            )
+        }
     }
 
     @Test
@@ -659,7 +679,14 @@ class ProductServiceTest {
             rentRequestInDBMockedAfterAccept
         )
 
-        assertThrows(NotAllowedAccessToResourceException::class.java) { productService.acceptOrRejectRentRequest("3333", "2222", true, "1234") }
+        assertThrows(NotAllowedAccessToResourceException::class.java) {
+            productService.acceptOrRejectRentRequest(
+                "3333",
+                "2222",
+                true,
+                "1234"
+            )
+        }
     }
 
     @Test

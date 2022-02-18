@@ -1,6 +1,5 @@
 package de.sharetopia.productservice.unitTests
 
-import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
 import de.sharetopia.productservice.product.model.Address
 import de.sharetopia.productservice.product.model.DateRangeDuration
@@ -98,7 +97,8 @@ class RentRequestServiceTest {
             rentableDateRange = DateRangeDuration(
                 LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            ))
+            )
+        )
 
         whenever(rentRequestRepository.save(any<RentRequestModel>())).thenReturn(rentRequestToCreate)
         whenever(productRepository.findById(any<String>())).thenReturn(Optional.of(productMockedInDb))
@@ -108,11 +108,11 @@ class RentRequestServiceTest {
 
         verify(rentRequestRepository, times(1)).save(argThat {
             (id === "1111") &&
-            (fromDate === rentRequestToCreate.fromDate) &&
-            (toDate === rentRequestToCreate.toDate) &&
-            (requesterUserId === rentRequestToCreate.requesterUserId) &&
-            (rentRequestReceiverUserId === rentRequestToCreate.rentRequestReceiverUserId) &&
-            (requestedProductId === rentRequestToCreate.requestedProductId)
+                    (fromDate === rentRequestToCreate.fromDate) &&
+                    (toDate === rentRequestToCreate.toDate) &&
+                    (requesterUserId === rentRequestToCreate.requesterUserId) &&
+                    (rentRequestReceiverUserId === rentRequestToCreate.rentRequestReceiverUserId) &&
+                    (requestedProductId === rentRequestToCreate.requestedProductId)
         })
     }
 
@@ -127,7 +127,7 @@ class RentRequestServiceTest {
             requestedProductId = "747"
         )
 
-        val productMockedInDb = ProductModel(
+        ProductModel(
             id = "12345",
             title = "Rennrad Rot",
             description = "Das ist mein rotes Rennrad",
@@ -139,7 +139,8 @@ class RentRequestServiceTest {
             rentableDateRange = DateRangeDuration(
                 LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            ))
+            )
+        )
 
         whenever(rentRequestRepository.save(any<RentRequestModel>())).thenReturn(rentRequestToCreate)
 
@@ -186,13 +187,13 @@ class RentRequestServiceTest {
         whenever(rentRequestRepository.findById(any<String>())).thenReturn(Optional.of(rentRequestMockedInDb))
 
         //test
-        val rentRequestReturnedByService = rentRequestService.findById("1111")
+        rentRequestService.findById("1111")
         verify(rentRequestRepository, times(1)).findById("1111")
     }
 
     @Test
     fun `should delete rent request by id`() {
-        val rentRequestMockedInDb = RentRequestModel(
+        RentRequestModel(
             id = "1111",
             fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
             toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
