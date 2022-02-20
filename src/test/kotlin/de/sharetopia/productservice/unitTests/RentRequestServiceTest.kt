@@ -7,6 +7,7 @@ import de.sharetopia.productservice.product.model.ProductModel
 import de.sharetopia.productservice.product.model.RentRequestModel
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
+import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.RentRequestService
 import de.sharetopia.productservice.product.service.RentRequestServiceImpl
 import org.junit.jupiter.api.Assertions
@@ -32,7 +33,7 @@ class RentRequestServiceTest {
     lateinit var rentRequestRepository: RentRequestRepository
 
     @Mock
-    lateinit var productRepository: ProductRepository
+    lateinit var productService: ProductService
 
     @InjectMocks
     var rentRequestService: RentRequestService = RentRequestServiceImpl()
@@ -75,7 +76,7 @@ class RentRequestServiceTest {
     }
 
     @Test
-    fun `should save and return rent request`() {
+    fun `should save rent request`() {
         val rentRequestToCreate = RentRequestModel(
             id = "1111",
             fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
@@ -101,7 +102,7 @@ class RentRequestServiceTest {
         )
 
         whenever(rentRequestRepository.save(any<RentRequestModel>())).thenReturn(rentRequestToCreate)
-        whenever(productRepository.findById(any<String>())).thenReturn(Optional.of(productMockedInDb))
+        whenever(productService.findById(any<String>())).thenReturn(productMockedInDb)
 
         //test
         rentRequestService.create(rentRequestToCreate, "1234")

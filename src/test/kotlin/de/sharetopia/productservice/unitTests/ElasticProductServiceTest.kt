@@ -125,7 +125,7 @@ class ElasticProductServiceTest {
     }
 
     @Test
-    fun `should find by title and near city`() {
+    fun `should find by title and near city without date`() {
         val product = ProductModel(
             id = "12345",
             title = "Rennrad Rot",
@@ -168,7 +168,7 @@ class ElasticProductServiceTest {
         )
 
         //test
-        elasticProductService.findByTitleAndNearCity("Rennrad", 10, "70569", PageRequest.of(0, 10))
+        elasticProductService.findByTitleAndNearCityWithOptionalDate("Rennrad", 10, "70569", null, null, PageRequest.of(0, 10), )
         verify(elasticProductRepository, times(1)).findByTitleAndNear(
             "Rennrad",
             10,
@@ -223,7 +223,7 @@ class ElasticProductServiceTest {
         )
 
         //test
-        elasticProductService.findByTitleAndNearCityWithDate(
+        elasticProductService.findByTitleAndNearCityWithOptionalDate(
             "Rennrad",
             10,
             "70569",

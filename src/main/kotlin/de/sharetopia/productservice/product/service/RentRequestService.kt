@@ -1,7 +1,6 @@
 package de.sharetopia.productservice.product.service
 
 import de.sharetopia.productservice.product.model.RentRequestModel
-import java.util.*
 
 interface RentRequestService {
     fun findAll(): List<RentRequestModel>
@@ -10,8 +9,8 @@ interface RentRequestService {
 
     fun updateStatus(newStatus: String, rentRequest: RentRequestModel): RentRequestModel
 
-    fun findById(rentRequestId: String): Optional<RentRequestModel>
+    fun findById(rentRequestId: String): RentRequestModel
 
-    fun deleteById(rentRequestId: String)
+    fun deleteById(rentRequestId: String, userId: String)
 
 }

@@ -1,8 +1,11 @@
 package de.sharetopia.productservice.product.service
 
 import de.sharetopia.productservice.product.dto.UserDTO
+import de.sharetopia.productservice.product.exception.UserNotFoundException
 import de.sharetopia.productservice.product.model.UserModel
 import de.sharetopia.productservice.product.repository.UserRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -11,6 +14,8 @@ import java.util.*
 class UserService {
     @Autowired
     private lateinit var userRepository: UserRepository
+
+    private val log: Logger = LoggerFactory.getLogger(UserService::class.java)
 
     fun save(user: UserModel, userId: String): UserModel {
         user.id = userId
@@ -22,7 +27,8 @@ class UserService {
         return userRepository.save(userModel)
     }
 
-    fun partialUpdate(userId: String, storedUserModel: UserModel, updatedFieldsUserDTO: UserDTO): UserModel {
+    fun partialUpdate(userId: String, updatedFieldsUserDTO: UserDTO): UserModel {
+        val storedUserModel = findById(userId)
         storedUserModel.id = userId
         val updatedModel = storedUserModel.copy(
             profilePictureURL = updatedFieldsUserDTO.profilePictureURL ?: storedUserModel.profilePictureURL,
@@ -36,8 +42,11 @@ class UserService {
         return userRepository.save(updatedModel)
     }
 
-    fun findById(userId: String): Optional<UserModel> {
-        return userRepository.findById(userId)
+    fun findById(userId: String): UserModel {
+        return userRepository.findById(userId).orElseThrow {
+            log.error("Error fetching current authorized user. {error=UserNotFoundException, requesterUserId=${userId}}")
+            UserNotFoundException(userId)
+        }
     }
 
 }

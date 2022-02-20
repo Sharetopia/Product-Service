@@ -7,7 +7,6 @@ import de.sharetopia.productservice.product.model.ProductModel
 import de.sharetopia.productservice.product.model.RentRequestModel
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import java.util.*
 
 interface ProductService {
     fun findAll(): List<ProductModel>
@@ -18,13 +17,13 @@ interface ProductService {
 
     fun partialUpdate(
         productId: String,
-        storedProductModel: ProductModel,
-        updatedFieldsProductDTO: ProductDTO
+        updatedFieldsProductDTO: ProductDTO,
+        userId: String
     ): ProductModel
 
-    fun findById(productId: String): Optional<ProductModel>
+    fun findById(productId: String): ProductModel
 
-    fun deleteById(productId: String)
+    fun deleteById(productId: String, userId: String)
 
     fun findManyById(ids: List<String>, pageable: Pageable): Page<ProductModel>
 

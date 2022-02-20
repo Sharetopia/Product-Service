@@ -99,9 +99,10 @@ class UserServiceTest {
             )
 
         whenever(userRepository.save(any<UserModel>())).doAnswer { it.arguments[0] as UserModel }
+        whenever(userRepository.findById("1234")).thenReturn(Optional.of(mockedUserInDb))
 
         //test
-        userService.partialUpdate("1234", mockedUserInDb, updatedFieldsUser)
+        userService.partialUpdate("1234", updatedFieldsUser)
 
         verify(userRepository, times(1)).save(argThat { userModel: UserModel ->
             (userModel.id === mockedUserInDb.id) &&
