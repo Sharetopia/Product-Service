@@ -24,10 +24,13 @@ import java.util.*
 class ProductServiceImpl : ProductService {
     @Autowired
     private lateinit var productRepository: ProductRepository
+
     @Autowired
     private lateinit var elasticProductService: ElasticProductService
+
     @Autowired
     private lateinit var rentRequestService: RentRequestService
+
     @Autowired
     private lateinit var rentRequestRepository: RentRequestRepository
 

@@ -1,24 +1,24 @@
 package de.sharetopia.productservice.product.model.geoCodeApiResponse
 
-data class GeoCodedAddress (
+data class GeoCodedAddress(
     val type: String,
     val licence: String,
     val features: List<Feature>
 )
 
-data class Feature (
+data class Feature(
     val type: String,
     val properties: Properties,
     val bbox: List<Double>,
     val geometry: Geometry
 )
 
-data class Geometry (
+data class Geometry(
     val type: String,
     val coordinates: List<Double>
 )
 
-data class Properties (
+data class Properties(
     val place_id: Long?,
 
     val osm_type: String?,

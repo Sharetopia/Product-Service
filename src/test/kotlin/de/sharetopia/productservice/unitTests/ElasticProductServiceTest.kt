@@ -244,7 +244,7 @@ class ElasticProductServiceTest {
 
     @Test
     fun `should delete product by id`() {
-        val product = ProductModel(
+        ProductModel(
             id = "12345",
             title = "Rennrad Rot",
             description = "Das ist mein rotes Rennrad",
@@ -269,7 +269,6 @@ class ElasticProductServiceTest {
             )
         )
 
-        val elasticProduct = ObjectMapperUtils.map(product, ElasticProductModel::class.java)
         whenever(elasticProductRepository.deleteById(any<String>())).doAnswer { }
 
         //test

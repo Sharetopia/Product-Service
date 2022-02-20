@@ -333,7 +333,7 @@ class UserControllerTest @Autowired constructor(
             )
         )
 
-        val rentRequestByOtherUserForProduct1StoredInDatabase = rentRequestRepository.save(
+        rentRequestRepository.save(
             RentRequestModel(
                 fromDate = LocalDate.parse("2021-12-22", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 toDate = LocalDate.parse("2021-12-27", DateTimeFormatter.ofPattern("yyyy-MM-dd")),

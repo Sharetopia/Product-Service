@@ -12,22 +12,24 @@ import org.springframework.http.MediaType
 import org.springframework.web.client.RestTemplate
 
 object GeoCoder {
-    private val urlString = "https://nominatim.openstreetmap.org/search?q={q}&format={format}&countrycodes={countrycodes}&limit={limit}"
-    private var vars: MutableMap<String, String> = hashMapOf("format" to "geojson", "countrycodes" to "de", "limit" to "1")
+    private val urlString =
+        "https://nominatim.openstreetmap.org/search?q={q}&format={format}&countrycodes={countrycodes}&limit={limit}"
+    private var vars: MutableMap<String, String> =
+        hashMapOf("format" to "geojson", "countrycodes" to "de", "limit" to "1")
     private val restTemplate = RestTemplate()
     private var headers = HttpHeaders()
     private val entity: HttpEntity<String>
 
     private val log: Logger = LoggerFactory.getLogger(GeoCoder::class.java)
 
-    init{
+    init {
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers.contentType = MediaType.APPLICATION_JSON
         headers.add("user-agent", "Mozilla/5.0 Firefox/26.0")
         entity = HttpEntity<String>("parameters", headers)
     }
 
-    fun getCoordinatesForAddress(address: Address): List<Double>{
+    fun getCoordinatesForAddress(address: Address): List<Double> {
         vars["q"] = "${address.street},${address.zip},${address.city}"
 
         val response = restTemplate.exchange(
@@ -39,14 +41,14 @@ object GeoCoder {
         val geoResult = response.body
         return if (geoResult != null && geoResult.features.isNotEmpty()) {
             geoResult.features[0].geometry.coordinates
-        } else{
+        } else {
             log.error("Error geocoding address to coordinates. {error=LocationNotFoundException}")
             throw LocationNotFoundException(address.toString())
         }
 
     }
 
-    fun getCoordinatesForCity(nameOrZip: String): List<Double>{
+    fun getCoordinatesForCity(nameOrZip: String): List<Double> {
         vars["q"] = nameOrZip
 
         val response = restTemplate.exchange(
@@ -58,7 +60,7 @@ object GeoCoder {
         val geoResult = response.body
         return if (geoResult != null && geoResult.features.isNotEmpty()) {
             geoResult.features[0].geometry.coordinates
-        } else{
+        } else {
             log.error("Error geocoding city identifier to coordinates. {error=LocationNotFoundException}")
             throw LocationNotFoundException(nameOrZip)
         }

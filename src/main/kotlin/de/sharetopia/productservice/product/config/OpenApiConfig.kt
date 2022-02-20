@@ -13,18 +13,23 @@ class OpenApiConfig {
     @Bean
     fun customOpenAPI(): OpenAPI {
         return OpenAPI()
-            .components(Components().addSecuritySchemes("bearer-jwt",
-                SecurityScheme()
-                    .type(SecurityScheme.Type.HTTP)
-                    .scheme("bearer")
-                    .bearerFormat("JWT")
+            .components(
+                Components().addSecuritySchemes(
+                    "bearer-jwt",
+                    SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")
                 )
             )
-            .info(Info()
-                .title("Product Service API")
-                .description("This is the API documentation for the Product Service of the sharetopia app."))
+            .info(
+                Info()
+                    .title("Product Service API")
+                    .description("This is the API documentation for the Product Service of the sharetopia app.")
+            )
             .addSecurityItem(
-                SecurityRequirement().addList("bearer-jwt", listOf("read", "write")))
+                SecurityRequirement().addList("bearer-jwt", listOf("read", "write"))
+            )
     }
 }
 

@@ -6,5 +6,4 @@ data class RentRequestDTO(
     var fromDate: LocalDate? = null,
     var toDate: LocalDate? = null,
     var requestedProductId: String? = null,
-){
-}
+)

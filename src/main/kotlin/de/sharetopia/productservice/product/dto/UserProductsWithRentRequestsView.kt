@@ -15,9 +15,12 @@ class UserProductsWithRentRequestsView {
     lateinit var tags: List<String>
     lateinit var price: BigDecimal
     lateinit var address: Address
-    @ArraySchema( arraySchema =  Schema(
-        description = "Longitude/Latitude",
-        example ="[9.430380, 48.923069]")
+
+    @ArraySchema(
+        arraySchema = Schema(
+            description = "Longitude/Latitude",
+            example = "[9.430380, 48.923069]"
+        )
     )
     lateinit var location: List<Double>
     lateinit var rentableDateRange: DateRangeDuration
