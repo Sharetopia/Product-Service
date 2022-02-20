@@ -134,8 +134,7 @@ class ProductServiceTest {
 
     @Test
     fun `should return created product`() {
-        val productToCreate =
-            ProductModel(
+        val productToCreate = ProductModel(
                 id = "12345",
                 title = "Rennrad Rot",
                 description = "Das ist mein rotes Rennrad",

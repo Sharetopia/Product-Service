@@ -119,43 +119,6 @@ class RentRequestServiceTest {
     }
 
     @Test
-    fun `should throw ProductNotFoundException when trying to create rent request for non-existing product`() {
-        val rentRequestToCreate = RentRequestModel(
-            id = "1111",
-            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requesterUserId = "1234",
-            rentRequestReceiverUserId = "5678",
-            requestedProductId = "747"
-        )
-
-        ProductModel(
-            id = "12345",
-            title = "Rennrad Rot",
-            description = "Das ist mein rotes Rennrad",
-            ownerOfProductUserId = "5678",
-            tags = listOf("Fahrrad", "Mobilität"),
-            price = BigDecimal(12.99),
-            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
-            location = listOf(9.100591, 48.7419328),
-            rentableDateRange = DateRangeDuration(
-                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            )
-        )
-
-        whenever(rentRequestRepository.save(any<RentRequestModel>())).thenReturn(rentRequestToCreate)
-
-        //test
-        assertThrows(ProductNotFoundException::class.java) {
-            rentRequestService.create(
-                rentRequestToCreate,
-                "1234"
-            )
-        }
-    }
-
-    @Test
     fun `should update status of rent request`() {
         val rentRequestToUpdate = RentRequestModel(
             id = "1111",

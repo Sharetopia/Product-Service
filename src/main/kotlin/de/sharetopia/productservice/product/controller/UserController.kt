@@ -56,8 +56,8 @@ class UserController {
     }
 
     @Operation(
-        summary = "Updates product by id",
-        description = "Updates the provided fields of the product which belongs to the given id."
+        summary = "Updates user by id",
+        description = "Updates the provided fields of the user which belongs to the given id."
     )
     @PatchMapping("/user")
     fun partialUpdate(

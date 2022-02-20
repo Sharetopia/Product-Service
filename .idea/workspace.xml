@@ -7,8 +7,9 @@
     <list default="true" id="7f43bb12-0405-4c94-ab34-f39658e42a8b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/application.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/integrationTests/ProductControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/integrationTests/ProductControllerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/UserController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/UserController.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ProductServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ProductServiceTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/RentRequestServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/RentRequestServiceTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
