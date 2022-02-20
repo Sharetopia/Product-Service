@@ -3,7 +3,6 @@ package de.sharetopia.productservice.product.service
 import de.sharetopia.productservice.product.dto.*
 import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
-import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
 import de.sharetopia.productservice.product.exception.productIdUrlBodyMismatchException
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ProductRepository

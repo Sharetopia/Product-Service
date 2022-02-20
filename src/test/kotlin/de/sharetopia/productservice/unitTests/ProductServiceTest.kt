@@ -9,7 +9,10 @@ import de.sharetopia.productservice.product.exception.RentRequestNotFoundExcepti
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
-import de.sharetopia.productservice.product.service.*
+import de.sharetopia.productservice.product.service.ElasticProductService
+import de.sharetopia.productservice.product.service.ProductService
+import de.sharetopia.productservice.product.service.ProductServiceImpl
+import de.sharetopia.productservice.product.service.RentRequestService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -20,11 +23,12 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageRequest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.math.BigDecimal
@@ -411,7 +415,8 @@ class ProductServiceTest {
         whenever(productRepository.save(any<ProductModel>())).doAnswer { it.arguments[0] as ProductModel }
 
         //test
-        val productReturnedByService = productService.partialUpdate("12345", updateFieldsProduct, "204e1304-26f0-47b5-b353-cee12f4c8d34")
+        val productReturnedByService =
+            productService.partialUpdate("12345", updateFieldsProduct, "204e1304-26f0-47b5-b353-cee12f4c8d34")
 
         verify(productRepository).save(argThat { productModel: ProductModel ->
             (productModel.id === "12345") &&
@@ -500,7 +505,7 @@ class ProductServiceTest {
             )
         )
         whenever(productRepository.findById(productInDb.id)).thenReturn(Optional.of(productInDb))
-        whenever(elasticProductService.deleteById(productInDb.id)).doAnswer {  }
+        whenever(elasticProductService.deleteById(productInDb.id)).doAnswer { }
 
         productService.deleteById(idOfProductToDelete, "204e1304-26f0-47b5-b353-cee12f4c8d34")
         verify(productRepository, times(1)).deleteById(idOfProductToDelete)
@@ -542,7 +547,7 @@ class ProductServiceTest {
             )
         )
         whenever(productRepository.findById(productInDb.id)).thenReturn(Optional.of(productInDb))
-        whenever(elasticProductService.deleteById(productInDb.id)).doAnswer {  }
+        whenever(elasticProductService.deleteById(productInDb.id)).doAnswer { }
 
         assertThrows(NotAllowedAccessToResourceException::class.java) {
             productService.deleteById(idOfProductToDelete, "1111")

@@ -1,9 +1,11 @@
 package de.sharetopia.productservice.unitTests
 
 import de.sharetopia.productservice.product.dto.UserDTO
+import de.sharetopia.productservice.product.exception.UserNotFoundException
 import de.sharetopia.productservice.product.model.UserModel
 import de.sharetopia.productservice.product.repository.UserRepository
 import de.sharetopia.productservice.product.service.UserService
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -116,6 +118,18 @@ class UserServiceTest {
     }
 
     @Test
+    fun `should throw UserNotFoundException when trying to partially update non-existing user`() {
+        val updatedFieldsUser =
+            UserDTO(
+                rating = "3"
+            )
+
+        assertThrows(UserNotFoundException::class.java) {
+            userService.partialUpdate("123", updatedFieldsUser)
+        }
+    }
+
+    @Test
     fun `should find user by id`() {
         val mockedUserInDb = UserModel(
             id = "1234",
@@ -131,5 +145,12 @@ class UserServiceTest {
         //test
         userService.findById("1234")
         verify(userRepository, times(1)).findById("1234")
+    }
+
+    @Test
+    fun `should throw UserNotFoundException trying to access non-existing user`() {
+        assertThrows(UserNotFoundException::class.java) {
+            userService.findById("123")
+        }
     }
 }

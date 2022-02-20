@@ -1,11 +1,12 @@
 package de.sharetopia.productservice.unitTests
 
+import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
+import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
 import de.sharetopia.productservice.product.model.Address
 import de.sharetopia.productservice.product.model.DateRangeDuration
 import de.sharetopia.productservice.product.model.ProductModel
 import de.sharetopia.productservice.product.model.RentRequestModel
-import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
 import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.RentRequestService
@@ -193,8 +194,16 @@ class RentRequestServiceTest {
     }
 
     @Test
+    fun `should throw RentRequestNotFoundException when trying to access non-existing request`() {
+        //test
+        assertThrows(RentRequestNotFoundException::class.java) {
+            rentRequestService.findById("1111")
+        }
+    }
+
+    @Test
     fun `should delete rent request by id`() {
-        RentRequestModel(
+        val rentRequestInDb = RentRequestModel(
             id = "1111",
             fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
             toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
@@ -203,9 +212,38 @@ class RentRequestServiceTest {
             requestedProductId = "747"
         )
         whenever(rentRequestRepository.deleteById(any<String>())).doAnswer { }
+        whenever(rentRequestRepository.findById("1111")).thenReturn(Optional.of(rentRequestInDb))
 
         //test
-        rentRequestRepository.deleteById("1111")
+        rentRequestService.deleteById("1111", "1234")
         verify(rentRequestRepository, times(1)).deleteById("1111")
     }
+
+    @Test
+    fun `should throw RentRequestNotFoundException when trying to delete rent request by non-existing id`() {
+        //test
+        assertThrows(RentRequestNotFoundException::class.java) {
+            rentRequestService.deleteById("1111", "1234")
+        }
+    }
+
+    @Test
+    fun `should throw NotAllowedAccessToResource when trying to delete rent request started by different user`() {
+        val rentRequestInDb = RentRequestModel(
+            id = "1111",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "747"
+        )
+        whenever(rentRequestRepository.deleteById(any<String>())).doAnswer { }
+        whenever(rentRequestRepository.findById("1111")).thenReturn(Optional.of(rentRequestInDb))
+
+        //test
+        assertThrows(NotAllowedAccessToResourceException::class.java) {
+            rentRequestService.deleteById("1111", "99999999999999")
+        }
+    }
+
 }
