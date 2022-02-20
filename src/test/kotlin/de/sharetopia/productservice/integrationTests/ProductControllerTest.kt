@@ -85,8 +85,6 @@ class ProductControllerTest @Autowired constructor(
         elasticProductRepository.deleteAll()
         rentRequestRepository.deleteAll()
         userRepository.deleteAll()
-
-        Thread.sleep(2000)
     }
 
     @Test

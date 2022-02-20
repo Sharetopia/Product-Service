@@ -21,6 +21,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -58,7 +59,6 @@ class ProductServiceTest {
 
     @BeforeEach
     fun setup() {
-        Thread.sleep(2000)
         MockitoAnnotations.openMocks(this)
     }
 
@@ -764,6 +764,8 @@ class ProductServiceTest {
             )
         )
         whenever(rentRequestService.findById("2222")).thenReturn(rentRequestInDBMocked)
+        whenever(productRepository.findById("235235456345")).doThrow(ProductNotFoundException("235235456345"))
+
         assertThrows(ProductNotFoundException::class.java) {
             productService.acceptOrRejectRentRequest(
                 "235235456345",
