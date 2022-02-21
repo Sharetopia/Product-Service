@@ -7,9 +7,9 @@
     <list default="true" id="7f43bb12-0405-4c94-ab34-f39658e42a8b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/application.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/UserController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/de/sharetopia/productservice/product/controller/UserController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/integrationTests/ProductControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/integrationTests/ProductControllerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ElasticProductServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ElasticProductServiceTest.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ProductServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/ProductServiceTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/RentRequestServiceTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/de/sharetopia/productservice/unitTests/RentRequestServiceTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,13 +65,13 @@
       <recent name="de.sharetopia.productservice.integrationTests" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.ProductServiceTest">
-    <configuration name="ProductServiceTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.ProductControllerTest">
+    <configuration name="ProductControllerTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.ProductServiceTest&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.integrationTests.ProductControllerTest&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -87,12 +87,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="ProductServiceTest.should throw ProductNotFoundException when trying to accept reject rent request for non existing product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductControllerTest.should create new product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.ProductServiceTest.should throw ProductNotFoundException when trying to accept reject rent request for non existing product&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.integrationTests.ProductControllerTest.should create new product&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -108,12 +108,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="UserServiceTest.should throw UserNotFoundException trying to access non-existing user" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductControllerTest.should update existing product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.UserServiceTest.should throw UserNotFoundException trying to access non-existing user&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.integrationTests.ProductControllerTest.should update existing product&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -129,12 +129,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="UserServiceTest.should throw UserNotFoundException when trying to partially update non-existing user" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="ProductControllerTest.should update single field of existing product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.UserServiceTest.should throw UserNotFoundException when trying to partially update non-existing user&quot;" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.integrationTests.ProductControllerTest.should update single field of existing product&quot;" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -150,29 +150,34 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="ProductServiceTest.should throw ProductNotFoundException when trying to accept reject rent request for non existing product" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="product-service.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="de.sharetopia.productservice.unitTests.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="de.sharetopia.productservice.unitTests" />
-      <option name="MAIN_CLASS_NAME" value="de.sharetopia.productservice.unitTests.ProductServiceTest" />
-      <option name="METHOD_NAME" value="should throw ProductNotFoundException when trying to accept reject rent request for non existing product" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
+    <configuration name="ProductServiceTest.should return created product" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;de.sharetopia.productservice.unitTests.ProductServiceTest.should return created product&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.ProductServiceTest" />
-        <item itemvalue="Gradle.ProductServiceTest.should throw ProductNotFoundException when trying to accept reject rent request for non existing product" />
-        <item itemvalue="JUnit.ProductServiceTest.should throw ProductNotFoundException when trying to accept reject rent request for non existing product" />
-        <item itemvalue="Gradle.UserServiceTest.should throw UserNotFoundException when trying to partially update non-existing user" />
-        <item itemvalue="Gradle.UserServiceTest.should throw UserNotFoundException trying to access non-existing user" />
+        <item itemvalue="Gradle.ProductControllerTest" />
+        <item itemvalue="Gradle.ProductControllerTest.should update single field of existing product" />
+        <item itemvalue="Gradle.ProductControllerTest.should update existing product" />
+        <item itemvalue="Gradle.ProductControllerTest.should create new product" />
+        <item itemvalue="Gradle.ProductServiceTest.should return created product" />
       </list>
     </recent_temporary>
   </component>

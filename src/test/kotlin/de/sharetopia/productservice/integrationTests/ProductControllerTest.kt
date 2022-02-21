@@ -172,6 +172,12 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(productRequest.tags, response.body?.tags)
         assertEquals(productRequest.price, response.body?.price)
         assertEquals(productRequest.address, response.body?.address)
+        assertTrue((9.43 < response.body?.location?.get(0)!!) && (response.body?.location?.get(0)!! < 9.44))
+        assertTrue(
+            (48.94 < response.body?.location?.get(1)!!) && (response.body?.location?.get(
+                1
+            )!! < 48.95)
+        )
         assertThat(productRequest.rentableDateRange)
             .usingRecursiveComparison().isEqualTo(response.body?.rentableDateRange)
         assertThat(productRequest.rents)
@@ -222,6 +228,12 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(productRequest.tags, updateResponse.body?.tags)
         assertEquals(productRequest.price, updateResponse.body?.price)
         assertEquals(productRequest.address, updateResponse.body?.address)
+        assertTrue((9.43 < updateResponse.body?.location?.get(0)!!) && (updateResponse.body?.location?.get(0)!! < 9.44))
+        assertTrue(
+            (48.94 < updateResponse.body?.location?.get(1)!!) && (updateResponse.body?.location?.get(
+                1
+            )!! < 48.95)
+        )
         assertThat(productRequest.rentableDateRange).usingRecursiveComparison()
             .isEqualTo(updateResponse.body?.rentableDateRange)
         assertThat(productRequest.rents).usingRecursiveComparison().isEqualTo(updateResponse.body?.rents)
@@ -291,6 +303,12 @@ class ProductControllerTest @Autowired constructor(
         assertEquals(initialProductModel.price, patchResponse.body?.price)
         assertEquals(initialProductModel.tags, patchResponse.body?.tags)
         assertEquals(initialProductModel.address, patchResponse.body?.address)
+        assertTrue((9.10 < patchResponse.body?.location?.get(0)!!) && (patchResponse.body?.location?.get(0)!! < 9.11))
+        assertTrue(
+            (48.74 < patchResponse.body?.location?.get(1)!!) && (patchResponse.body?.location?.get(
+                1
+            )!! < 48.75)
+        )
         assertThat(initialProductModel.rentableDateRange).usingRecursiveComparison()
             .isEqualTo(patchResponse.body?.rentableDateRange)
         assertThat(initialProductModel.rents).usingRecursiveComparison().isEqualTo(patchResponse.body?.rents)

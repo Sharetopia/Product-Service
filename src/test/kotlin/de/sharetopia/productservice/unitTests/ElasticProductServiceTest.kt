@@ -168,7 +168,14 @@ class ElasticProductServiceTest {
         )
 
         //test
-        elasticProductService.findByTitleAndNearCityWithOptionalDate("Rennrad", 10, "70569", null, null, PageRequest.of(0, 10), )
+        elasticProductService.findByTitleAndNearCityWithOptionalDate(
+            "Rennrad",
+            10,
+            "70569",
+            null,
+            null,
+            PageRequest.of(0, 10),
+        )
         verify(elasticProductRepository, times(1)).findByTitleAndNear(
             "Rennrad",
             10,

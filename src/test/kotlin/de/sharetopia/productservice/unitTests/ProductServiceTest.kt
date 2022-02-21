@@ -21,7 +21,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -135,28 +134,28 @@ class ProductServiceTest {
     @Test
     fun `should return created product`() {
         val productToCreate = ProductModel(
-                id = "12345",
-                title = "Rennrad Rot",
-                description = "Das ist mein rotes Rennrad",
-                ownerOfProductUserId = "204e1304-26f0-47b5-b353-cee12f4c8d34",
-                tags = listOf("Fahrrad", "Mobilität"),
-                price = BigDecimal(12.99),
-                address = Address("Nobelstraße 10", "Stuttgart", "70569"),
-                rentableDateRange = DateRangeDuration(
-                    LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                    LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                ),
-                rents = mutableListOf(
-                    Rent(
-                        "3242354",
-                        DateRangeDuration(
-                            LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                            LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                        ),
-                        "2142423535"
-                    )
+            id = "12345",
+            title = "Rennrad Rot",
+            description = "Das ist mein rotes Rennrad",
+            ownerOfProductUserId = "204e1304-26f0-47b5-b353-cee12f4c8d34",
+            tags = listOf("Fahrrad", "Mobilität"),
+            price = BigDecimal(12.99),
+            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
+            rentableDateRange = DateRangeDuration(
+                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            ),
+            rents = mutableListOf(
+                Rent(
+                    "3242354",
+                    DateRangeDuration(
+                        LocalDate.parse("2021-10-11", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        LocalDate.parse("2021-10-16", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    ),
+                    "2142423535"
                 )
             )
+        )
 
         whenever(productRepository.insert(productToCreate)).thenReturn(productToCreate)
 
@@ -170,11 +169,9 @@ class ProductServiceTest {
         assertEquals(productToCreate.title, productReturnedByService.title)
         assertEquals(productToCreate.description, productReturnedByService.description)
         assertThat(productToCreate.address).usingRecursiveComparison().isEqualTo(productReturnedByService.address)
-        assertTrue((9.10 < productReturnedByService.location?.get(0)!!) && (productReturnedByService.location?.get(0)!! < 9.11))
+        assertTrue((9.10 < productReturnedByService.location!![0]) && (productReturnedByService.location!![0] < 9.11))
         assertTrue(
-            (48.74 < productReturnedByService.location?.get(1)!!) && (productReturnedByService.location?.get(
-                1
-            )!! < 48.75)
+            (48.74 < productReturnedByService.location!![1]) && (productReturnedByService.location!![1] < 48.75)
         )
     }
 
@@ -689,7 +686,7 @@ class ProductServiceTest {
     }
 
     @Test
-    fun `should throw RentRequestNotFoundException when trying to accept reject non-existing rent request`() {
+    fun `should throw RentRequestNotFoundException when trying to accept non-existing rent request`() {
         val productInDb = ProductModel(
             id = "3333",
             title = "Rennrad Rot",
@@ -728,7 +725,7 @@ class ProductServiceTest {
     }
 
     @Test
-    fun `should throw ProductNotFoundException when trying to accept reject rent request for non existing product`() {
+    fun `should throw ProductNotFoundException when trying to accept rent request for non existing product`() {
         val rentRequestInDBMocked = RentRequestModel(
             id = "2222",
             fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
@@ -776,7 +773,7 @@ class ProductServiceTest {
     }
 
     @Test
-    fun `should throw NotAllowedAccessToResourceException when trying to accept rent request of other product`() {
+    fun `should throw NotAllowedAccessToResourceException when trying to accept rent request of product owned by other user`() {
         val rentRequestInDBMocked = RentRequestModel(
             id = "2222",
             fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
