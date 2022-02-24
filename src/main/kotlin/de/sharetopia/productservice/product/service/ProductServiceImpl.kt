@@ -3,7 +3,6 @@ package de.sharetopia.productservice.product.service
 import de.sharetopia.productservice.product.dto.*
 import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
-import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
 import de.sharetopia.productservice.product.exception.productIdUrlBodyMismatchException
 import de.sharetopia.productservice.product.model.*
 import de.sharetopia.productservice.product.repository.ProductRepository
@@ -17,7 +16,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.util.*
 
 
 @Service
@@ -71,10 +69,15 @@ class ProductServiceImpl : ProductService {
 
     override fun partialUpdate(
         productId: String,
-        storedProductModel: ProductModel,
-        updatedFieldsProductDTO: ProductDTO
+        updatedFieldsProductDTO: ProductDTO,
+        userId: String
     ): ProductModel {
+        val storedProductModel = findById(productId)
         storedProductModel.id = productId
+        if (storedProductModel.ownerOfProductUserId != userId) {
+            log.error("Error by not allowed access to product. {NotAllowedAccessToResourceException, productId=$productId, requesterUserId=${userId}}")
+            throw NotAllowedAccessToResourceException(userId)
+        }
         if (updatedFieldsProductDTO.address != null) {
             updatedFieldsProductDTO.location = GeoCoder.getCoordinatesForAddress(updatedFieldsProductDTO.address!!)
         }
@@ -88,15 +91,25 @@ class ProductServiceImpl : ProductService {
             rentableDateRange = updatedFieldsProductDTO.rentableDateRange ?: storedProductModel.rentableDateRange,
             rents = (updatedFieldsProductDTO.rents ?: storedProductModel.rents) as MutableList<Rent>?
         )
+        elasticProductService.save(ObjectMapperUtils.map(updatedModel, ElasticProductModel::class.java))
         return productRepository.save(updatedModel)
     }
 
-    override fun findById(productId: String): Optional<ProductModel> {
-        return productRepository.findById(productId)
+    override fun findById(productId: String): ProductModel {
+        return productRepository.findById(productId).orElseThrow {
+            log.error("Error fetching product by id. {error=ProductNotFoundException, productId=$productId}")
+            ProductNotFoundException(productId)
+        }
     }
 
-    override fun deleteById(productId: String) {
+    override fun deleteById(productId: String, userId: String) {
+        val productToBeDeleted = findById(productId)
+        if (productToBeDeleted.ownerOfProductUserId != userId) {
+            log.error("Error by not allowed access to product. {NotAllowedAccessToResourceException, productId=$productId, requesterUserId=${userId}}")
+            throw NotAllowedAccessToResourceException(userId)
+        }
         productRepository.deleteById(productId)
+        elasticProductService.deleteById(productId)
     }
 
     override fun findManyById(ids: List<String>, pageable: Pageable): Page<ProductModel> {
@@ -110,22 +123,18 @@ class ProductServiceImpl : ProductService {
         isAccepted: Boolean,
         userId: String
     ): RentRequestModel {
-        var rentRequest =
-            rentRequestService.findById(rentRequestId).orElseThrow {
-                log.error("Error trying fetch rent request by id. {error=RentRequestNotFoundException, method=POST, endpoint=/products/{id}/rent/{rentRequestId}, rentRequestId=${rentRequestId}, isAccepted=$isAccepted,requesterUserId=${userId}}")
-                RentRequestNotFoundException(rentRequestId)
-            }
-        var product = findById(productId).orElseThrow { ProductNotFoundException(productId) }
+        var rentRequest = rentRequestService.findById(rentRequestId)
+        var product = findById(productId)
 
         if (rentRequest.requestedProductId != productId) {
-            log.error("Error trying to accept/reject rent request because of id mismatch. {error=productIdUrlBodyMismatchException, method=POST, endpoint=/products/{id}/rent/{rentRequestId}, isAccepted=$isAccepted,rentRequestId=${rentRequestId}, requesterUserId=${userId}}")
+            log.error("Error trying to accept/reject rent request because of id mismatch. {error=productIdUrlBodyMismatchException, isAccepted=$isAccepted,rentRequestId=${rentRequestId}, requesterUserId=${userId}}")
             throw productIdUrlBodyMismatchException(
                 productId,
                 rentRequest.requestedProductId!!
             )
         }
         if (product.ownerOfProductUserId != userId) {
-            log.error("Error trying to accept/reject rent request because of not allowed access. {error=NotAllowedAccessToResourceException, method=POST, endpoint=/products/{id}/rent/{rentRequestId}, isAccepted=$isAccepted,rentRequestId=${rentRequestId}, requesterUserId=${userId}}")
+            log.error("Error trying to accept/reject rent request because of not allowed access. {error=NotAllowedAccessToResourceException, isAccepted=$isAccepted,rentRequestId=${rentRequestId}, requesterUserId=${userId}}")
             throw NotAllowedAccessToResourceException(userId)
         }
         if (isAccepted) {
@@ -171,7 +180,7 @@ class ProductServiceImpl : ProductService {
 
         val rentRequestsWithProduct: MutableList<UserSentRentRequestsWithProductsView> = mutableListOf()
         for (rentRequest in rentRequestsByUser) {
-            val productOfRentRequest = requestedProducts.first { it.id.toString() == rentRequest.requestedProductId }
+            val productOfRentRequest = requestedProducts.find { it.id == rentRequest.requestedProductId }
             rentRequestsWithProduct.add(
                 UserSentRentRequestsWithProductsView(
                     ObjectMapperUtils.map(

@@ -1,12 +1,14 @@
 package de.sharetopia.productservice.unitTests
 
+import de.sharetopia.productservice.product.exception.NotAllowedAccessToResourceException
 import de.sharetopia.productservice.product.exception.ProductNotFoundException
+import de.sharetopia.productservice.product.exception.RentRequestNotFoundException
 import de.sharetopia.productservice.product.model.Address
 import de.sharetopia.productservice.product.model.DateRangeDuration
 import de.sharetopia.productservice.product.model.ProductModel
 import de.sharetopia.productservice.product.model.RentRequestModel
-import de.sharetopia.productservice.product.repository.ProductRepository
 import de.sharetopia.productservice.product.repository.RentRequestRepository
+import de.sharetopia.productservice.product.service.ProductService
 import de.sharetopia.productservice.product.service.RentRequestService
 import de.sharetopia.productservice.product.service.RentRequestServiceImpl
 import org.junit.jupiter.api.Assertions
@@ -32,7 +34,7 @@ class RentRequestServiceTest {
     lateinit var rentRequestRepository: RentRequestRepository
 
     @Mock
-    lateinit var productRepository: ProductRepository
+    lateinit var productService: ProductService
 
     @InjectMocks
     var rentRequestService: RentRequestService = RentRequestServiceImpl()
@@ -75,7 +77,7 @@ class RentRequestServiceTest {
     }
 
     @Test
-    fun `should save and return rent request`() {
+    fun `should save rent request`() {
         val rentRequestToCreate = RentRequestModel(
             id = "1111",
             fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
@@ -101,7 +103,7 @@ class RentRequestServiceTest {
         )
 
         whenever(rentRequestRepository.save(any<RentRequestModel>())).thenReturn(rentRequestToCreate)
-        whenever(productRepository.findById(any<String>())).thenReturn(Optional.of(productMockedInDb))
+        whenever(productService.findById(any<String>())).thenReturn(productMockedInDb)
 
         //test
         rentRequestService.create(rentRequestToCreate, "1234")
@@ -114,43 +116,6 @@ class RentRequestServiceTest {
                     (rentRequestReceiverUserId === rentRequestToCreate.rentRequestReceiverUserId) &&
                     (requestedProductId === rentRequestToCreate.requestedProductId)
         })
-    }
-
-    @Test
-    fun `should throw ProductNotFoundException when trying to create rent request for non-existing product`() {
-        val rentRequestToCreate = RentRequestModel(
-            id = "1111",
-            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            requesterUserId = "1234",
-            rentRequestReceiverUserId = "5678",
-            requestedProductId = "747"
-        )
-
-        ProductModel(
-            id = "12345",
-            title = "Rennrad Rot",
-            description = "Das ist mein rotes Rennrad",
-            ownerOfProductUserId = "5678",
-            tags = listOf("Fahrrad", "Mobilität"),
-            price = BigDecimal(12.99),
-            address = Address("Nobelstraße 10", "Stuttgart", "70569"),
-            location = listOf(9.100591, 48.7419328),
-            rentableDateRange = DateRangeDuration(
-                LocalDate.parse("2021-10-10", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                LocalDate.parse("2022-04-10", DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            )
-        )
-
-        whenever(rentRequestRepository.save(any<RentRequestModel>())).thenReturn(rentRequestToCreate)
-
-        //test
-        assertThrows(ProductNotFoundException::class.java) {
-            rentRequestService.create(
-                rentRequestToCreate,
-                "1234"
-            )
-        }
     }
 
     @Test
@@ -192,8 +157,16 @@ class RentRequestServiceTest {
     }
 
     @Test
+    fun `should throw RentRequestNotFoundException when trying to access non-existing request`() {
+        //test
+        assertThrows(RentRequestNotFoundException::class.java) {
+            rentRequestService.findById("1111")
+        }
+    }
+
+    @Test
     fun `should delete rent request by id`() {
-        RentRequestModel(
+        val rentRequestInDb = RentRequestModel(
             id = "1111",
             fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
             toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
@@ -202,9 +175,38 @@ class RentRequestServiceTest {
             requestedProductId = "747"
         )
         whenever(rentRequestRepository.deleteById(any<String>())).doAnswer { }
+        whenever(rentRequestRepository.findById("1111")).thenReturn(Optional.of(rentRequestInDb))
 
         //test
-        rentRequestRepository.deleteById("1111")
+        rentRequestService.deleteById("1111", "1234")
         verify(rentRequestRepository, times(1)).deleteById("1111")
     }
+
+    @Test
+    fun `should throw RentRequestNotFoundException when trying to delete rent request by non-existing id`() {
+        //test
+        assertThrows(RentRequestNotFoundException::class.java) {
+            rentRequestService.deleteById("1111", "1234")
+        }
+    }
+
+    @Test
+    fun `should throw NotAllowedAccessToResource when trying to delete rent request started by different user`() {
+        val rentRequestInDb = RentRequestModel(
+            id = "1111",
+            fromDate = LocalDate.parse("2021-12-20", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            toDate = LocalDate.parse("2021-12-28", DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+            requesterUserId = "1234",
+            rentRequestReceiverUserId = "5678",
+            requestedProductId = "747"
+        )
+        whenever(rentRequestRepository.deleteById(any<String>())).doAnswer { }
+        whenever(rentRequestRepository.findById("1111")).thenReturn(Optional.of(rentRequestInDb))
+
+        //test
+        assertThrows(NotAllowedAccessToResourceException::class.java) {
+            rentRequestService.deleteById("1111", "99999999999999")
+        }
+    }
+
 }

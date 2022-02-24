@@ -1,9 +1,11 @@
 package de.sharetopia.productservice.unitTests
 
 import de.sharetopia.productservice.product.dto.UserDTO
+import de.sharetopia.productservice.product.exception.UserNotFoundException
 import de.sharetopia.productservice.product.model.UserModel
 import de.sharetopia.productservice.product.repository.UserRepository
 import de.sharetopia.productservice.product.service.UserService
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -99,9 +101,10 @@ class UserServiceTest {
             )
 
         whenever(userRepository.save(any<UserModel>())).doAnswer { it.arguments[0] as UserModel }
+        whenever(userRepository.findById("1234")).thenReturn(Optional.of(mockedUserInDb))
 
         //test
-        userService.partialUpdate("1234", mockedUserInDb, updatedFieldsUser)
+        userService.partialUpdate("1234", updatedFieldsUser)
 
         verify(userRepository, times(1)).save(argThat { userModel: UserModel ->
             (userModel.id === mockedUserInDb.id) &&
@@ -112,6 +115,18 @@ class UserServiceTest {
                     (userModel.rating === updatedFieldsUser.rating) &&
                     (userModel.postalCode === mockedUserInDb.postalCode)
         })
+    }
+
+    @Test
+    fun `should throw UserNotFoundException when trying to partially update non-existing user`() {
+        val updatedFieldsUser =
+            UserDTO(
+                rating = "3"
+            )
+
+        assertThrows(UserNotFoundException::class.java) {
+            userService.partialUpdate("123", updatedFieldsUser)
+        }
     }
 
     @Test
@@ -130,5 +145,12 @@ class UserServiceTest {
         //test
         userService.findById("1234")
         verify(userRepository, times(1)).findById("1234")
+    }
+
+    @Test
+    fun `should throw UserNotFoundException trying to access non-existing user`() {
+        assertThrows(UserNotFoundException::class.java) {
+            userService.findById("123")
+        }
     }
 }
