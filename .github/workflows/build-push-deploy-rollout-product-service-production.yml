@@ -39,9 +39,9 @@ jobs:
         env:
           IMAGE: ${{ steps.build-image.outputs.image }}
         with:
-          args: set image deployment/product-service app=${{ env.IMAGE }} --record -n $KUBE_NAMESPACE
+          args: set image deployment/sharetopia-product-service app=${{ env.IMAGE }} --record -n $KUBE_NAMESPACE
 
       - name: Verify Kubernetes deployment
         uses: kodermax/kubectl-aws-eks@master
         with:
-          args: rollout status deploy product-service -n $KUBE_NAMESPACE
+          args: rollout status deploy sharetopia-product-service -n $KUBE_NAMESPACE
