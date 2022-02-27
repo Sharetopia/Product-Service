@@ -4,8 +4,6 @@ services:
   sharetopia-mongo:
     image: mongo:latest
     container_name: sharetopia-mongo
-    expose:
-      - 27017
     ports:
       - "0.0.0.0:27017:27017"
     networks:
@@ -15,8 +13,6 @@ services:
     build: ./
     container_name: sharetopia-product-service
     restart: unless-stopped
-    expose:
-      - 8080
     ports:
       - "0.0.0.0:8080:8080"
     networks:
@@ -32,6 +28,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
     container_name: sharetopia-elasticsearch
     environment:
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
       - xpack.security.enabled=false
       - discovery.type=single-node
     ulimits:
@@ -43,9 +40,6 @@ services:
         hard: 65536
     cap_add:
       - IPC_LOCK
-    expose:
-      - 9200
-      - 9300
     ports:
       - "0.0.0.0:9200:9200"
       - "0.0.0.0:9300:9300"

@@ -1,0 +1,47 @@
+name: Rollout product service to kubernetes cluster 
+
+on:
+  push:
+    branches: [main]
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+  KUBE_NAMESPACE: production
+  ECR_REGISTRY: 283433289038.dkr.ecr.eu-central-1.amazonaws.com
+  ECR_REPOSITORY: sharetopia-product-service
+
+jobs:
+  build-push-deploy-rollout:
+    name: build & push container and deploy & rollout product service
+    runs-on: ubuntu-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag and push image to ECR
+        id: build-image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Deploy to Kubernetes cluster
+        uses: kodermax/kubectl-aws-eks@master
+        env:
+          IMAGE: ${{ steps.build-image.outputs.image }}
+        with:
+          args: set image deployment/sharetopia-product-service app=${{ env.IMAGE }} --record -n $KUBE_NAMESPACE
+
+      - name: Verify Kubernetes deployment
+        uses: kodermax/kubectl-aws-eks@master
+        with:
+          args: rollout status deploy sharetopia-product-service -n $KUBE_NAMESPACE
